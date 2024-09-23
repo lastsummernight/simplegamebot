@@ -27,30 +27,10 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
             SendMessage message = new SendMessage(chat_id, message_text);
 
-            List<KeyboardRow> keyboard = new ArrayList<>();
-            KeyboardRow keyboardFirstRow = new KeyboardRow();
-            keyboardFirstRow.add("1");
-            keyboardFirstRow.add("2");
-            keyboardFirstRow.add("3");
+            keyboardBuilder BUILDER = new keyboardBuilder();
 
-            KeyboardRow keyboardSecondRow = new KeyboardRow();
-            keyboardSecondRow.add("4");
-            keyboardSecondRow.add("5");
-            keyboardSecondRow.add("6");
+            ReplyKeyboardMarkup replyKeyboardMarkup = BUILDER.buildKeyboard(3, 3);
 
-            KeyboardRow keyboardThirdRow = new KeyboardRow();
-            keyboardThirdRow.add("7");
-            keyboardThirdRow.add("8");
-            keyboardThirdRow.add("9");
-
-            keyboard.add(keyboardFirstRow);
-            keyboard.add(keyboardSecondRow);
-            keyboard.add(keyboardThirdRow);
-
-            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboard);
-            replyKeyboardMarkup.setSelective(true);
-            replyKeyboardMarkup.setResizeKeyboard(true);
-            replyKeyboardMarkup.setOneTimeKeyboard(false);
             message.setReplyMarkup(replyKeyboardMarkup);
 
             try {
