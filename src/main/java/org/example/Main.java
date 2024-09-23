@@ -6,7 +6,7 @@ public class Main {
         String botToken = token.token;
         try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()) {
             botsApplication.registerBot(botToken, new MyAmazingBot(botToken));
-            System.out.println("MyAmazingBot successfully started!");
+            System.out.println("AOAOAOOAOA successfully started!");
             Thread.currentThread().join();
         } catch (Exception e) {
             e.printStackTrace();
