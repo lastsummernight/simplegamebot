@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class keyboardBuilder {
@@ -30,6 +31,37 @@ public class keyboardBuilder {
         return replyKeyboardMarkup;
     }
 
+    public ReplyKeyboardMarkup buildKeyboard() {
+
+        List<String> ListOfButtons = Arrays.asList("Предложение ничьи", "Сдаться", "NW", "N", "NE", "W", "C", "E", "SW", "S", "SE");
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        for (int countRow = -1; countRow != 3; countRow++) {
+            KeyboardRow keyboardRow = new KeyboardRow();
+
+            if (countRow == -1) {
+                keyboardRow.add(ListOfButtons.get(0));
+                keyboardRow.add(ListOfButtons.get(1));
+            }
+
+            else {
+                for (int countCol = 0; countCol != 3; countCol++) {
+                    keyboardRow.add(ListOfButtons.get(countRow * 3 + countCol + 2));
+                }
+            }
+
+            keyboard.add(keyboardRow);
+
+        }
+
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboard);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        //replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        return replyKeyboardMarkup;
+    }
+
     public ReplyKeyboardMarkup buildKeyboard(int rows, int columns) {
 
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -44,7 +76,6 @@ public class keyboardBuilder {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboard);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
-        //replyKeyboardMarkup.setOneTimeKeyboard(false);
 
         return replyKeyboardMarkup;
     }
