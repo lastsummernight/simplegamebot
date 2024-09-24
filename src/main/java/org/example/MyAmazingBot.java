@@ -30,7 +30,10 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         array.add("Все");
 
         replyKeyboardMarkupStart = BUILDER.buildKeyboard(array);
-        replyKeyboardMarkupPlay = BUILDER.buildKeyboard(4, 3);
+        replyKeyboardMarkupPlay = BUILDER.buildKeyboard();
+
+        GameMaster proba = new GameMaster();
+        System.out.println(proba.GameEnd(0));
 
     }
 
@@ -51,15 +54,15 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                 botReply.setReplyMarkup(replyKeyboardMarkupPlay);
             }
 
-            if (message_text.contains("1")) {
+            if (message_text.contains("Согласие на ничью")) {
                 botReply.setText(StringFunctions.reverse(message_text));
             }
 
-            else if (message_text.contains("2")) {
+            else if (message_text.contains("Предложить ничью")) {
                 botReply.setMessageEffectId("5104841245755180586");
             }
 
-            else if (message_text.contains("3")) {
+            else if (message_text.contains("Сдаться")) {
                 botReply.setReplyMarkup(replyKeyboardMarkupStart);
             }
 
