@@ -8,6 +8,7 @@ public class Main {
             botsApplication.registerBot(botToken, new MyAmazingBot(botToken));
             System.out.println("AOAOAOOAOA successfully started!");
             Thread.currentThread().join();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
