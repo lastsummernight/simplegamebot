@@ -6,34 +6,31 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient telegramClient;
-    private ReplyKeyboardMarkup replyKeyboardMarkupPlay;
-    private ReplyKeyboardMarkup replyKeyboardMarkupStart;
+    private HashMap<String, Integer> allUsers;
+    private HashMap<String, ReplyKeyboardMarkup> allKeyboards;
 
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
+        allUsers = new HashMap<>();
 
         keyboardBuilder BUILDER = new keyboardBuilder();
 
-        List<String> array = new ArrayList<String>();
-        array.add("Играть");
-        array.add("Лидерборд");
-        array.add("Настройки");
-        array.add("Все");
+        allKeyboards = new HashMap<>();
 
-        replyKeyboardMarkupStart = BUILDER.buildKeyboard(array);
-        replyKeyboardMarkupPlay = BUILDER.buildKeyboard();
+        allKeyboards.put("sex", BUILDER.buildKeyboard("sex"));
+        allKeyboards.put("main_menu", BUILDER.buildKeyboard("main_menu"));
+        allKeyboards.put("like_dislike", BUILDER.buildKeyboard("like_dislike"));
 
-        GameMaster proba = new GameMaster();
-        System.out.println(proba.GameEnd(0));
+        Communicator proba = new Communicator();
 
     }
 
@@ -41,33 +38,66 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     public void consume(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             Message userMessage = update.getMessage();
-            String message_text = userMessage.getText();
-            String chat_id = userMessage.getChatId().toString();
+            String messageText = userMessage.getText();
+            String chatId = userMessage.getChatId().toString();
 
-            SendMessage botReply = new SendMessage(chat_id, message_text);
+            SendMessage botReply = new SendMessage(chatId, messageText);
 
-            if (message_text.contains("start")) {
-                botReply.setReplyMarkup(replyKeyboardMarkupStart);
+            if (messageText.contains("/start")) {
+                if (!allUsers.containsKey(chatId))
+                    allUsers.put(chatId, 1);
+                botReply.setText("Давай заполним Твою анкету\nВведи имя:");
             }
 
             else {
-                botReply.setReplyMarkup(replyKeyboardMarkupPlay);
-            }
+                if (allUsers.containsKey(chatId)) {
+                    switch (allUsers.get(chatId)) {
 
-            if (message_text.contains("Согласие на ничью")) {
-                botReply.setText(StringFunctions.reverse(message_text));
-            }
+                        case 1:
+                            // здеся нада записать фио человека
+                            allUsers.replace(chatId, 2);
+                            botReply.setText("Введи возраст (число):");
+                            break;
 
-            else if (message_text.contains("Предложить ничью")) {
-                botReply.setMessageEffectId("5104841245755180586");
-            }
+                        case 2:
+                            int age = StringFunctions.isNum(messageText);
+                            if (age != -1) {
+                                if ((age >= 14) && (age <= 50)) {
+                                    // здеся нада записать др человека
+                                    allUsers.replace(chatId, 3);
+                                    botReply.setText("Введи свой город:");
+                                    break;
+                                }
+                            }
+                            botReply.setText("Твой возраст должен быть числом от 14 лет ");
+                            break;
 
-            else if (message_text.contains("Сдаться")) {
-                botReply.setReplyMarkup(replyKeyboardMarkupStart);
-            }
+                        case 3:
+                            // здеся нада записать город человека
+                            allUsers.replace(chatId, 4);
+                            botReply.setText("Введи пол:");
+                            botReply.setReplyMarkup(allKeyboards.get("sex"));
+                            break;
 
-            else {
-                System.out.println(message_text);
+
+                        case 4:
+                            if ((messageText.compareTo("Парень") == 0) || (messageText.compareTo("Девушка") == 0)) {
+                                // здеся нада записать пол человека
+                                allUsers.replace(chatId, 5);
+                                botReply.setText("Введи о себе:");
+                                break;
+                            }
+                            botReply.setText("Неправильный ввод");
+                            break;
+
+                        case 5:
+                            // здеся нада записать "о себе" человека
+                            allUsers.replace(chatId, 6);
+                            botReply.setText("Анкета готова");
+                            botReply.setReplyMarkup(allKeyboards.get("mainmenu"));
+                            break;
+                    }
+                }
             }
 
             try {
