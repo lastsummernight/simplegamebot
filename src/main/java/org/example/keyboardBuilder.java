@@ -1,5 +1,6 @@
 package org.example;
 
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -11,7 +12,6 @@ import java.util.List;
 public class keyboardBuilder {
 
     public ReplyKeyboardMarkup buildKeyboard(String key) {
-
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
@@ -35,12 +35,17 @@ public class keyboardBuilder {
                 keyboardRow.add("\uD83D\uDC94"); // разбитое сердечко
                 keyboard.add(keyboardRow);
                 break;
+
+            case "empty":
+                keyboard.add(keyboardRow);
+                break;
         }
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboard);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        if (key.compareTo("sex") == 0)
+            replyKeyboardMarkup.setOneTimeKeyboard(true);
 
         return replyKeyboardMarkup;
     }

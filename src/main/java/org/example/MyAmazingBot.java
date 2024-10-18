@@ -5,6 +5,7 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -17,6 +18,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient telegramClient;
     private HashMap<String, Integer> allUsers;
     private HashMap<String, ReplyKeyboardMarkup> allKeyboards;
+    private ReplyKeyboardMarkup currentMarkup;
 
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
@@ -29,6 +31,9 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         allKeyboards.put("sex", BUILDER.buildKeyboard("sex"));
         allKeyboards.put("main_menu", BUILDER.buildKeyboard("main_menu"));
         allKeyboards.put("like_dislike", BUILDER.buildKeyboard("like_dislike"));
+        allKeyboards.put("empty", BUILDER.buildKeyboard("empty"));
+
+        currentMarkup = allKeyboards.get("empty");
 
         Communicator proba = new Communicator();
 
@@ -43,7 +48,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
             SendMessage botReply = new SendMessage(chatId, messageText);
 
-            if (messageText.contains("/start")) {
+            if (messageText.compareTo("/start") == 0) {
                 if (!allUsers.containsKey(chatId))
                     allUsers.put(chatId, 1);
                 botReply.setText("Давай заполним Твою анкету\nВведи имя:");
@@ -76,12 +81,13 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                             // здеся нада записать город человека
                             allUsers.replace(chatId, 4);
                             botReply.setText("Введи пол:");
-                            botReply.setReplyMarkup(allKeyboards.get("sex"));
+                            currentMarkup = allKeyboards.get("sex");
                             break;
 
 
                         case 4:
                             if ((messageText.compareTo("Парень") == 0) || (messageText.compareTo("Девушка") == 0)) {
+                                currentMarkup = allKeyboards.get("empty");
                                 // здеся нада записать пол человека
                                 allUsers.replace(chatId, 5);
                                 botReply.setText("Введи о себе:");
@@ -94,10 +100,16 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                             // здеся нада записать "о себе" человека
                             allUsers.replace(chatId, 6);
                             botReply.setText("Анкета готова");
-                            botReply.setReplyMarkup(allKeyboards.get("mainmenu"));
+                            currentMarkup = allKeyboards.get("main_menu");
+                            break;
+
+                        default:
+                            botReply.setText("Выберите команду на клавиатуре");
                             break;
                     }
                 }
+
+                botReply.setReplyMarkup(currentMarkup);
             }
 
             try {
