@@ -1,4 +1,4 @@
-package org.example;
+package com.github.simplegamebot;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 public class Main {
