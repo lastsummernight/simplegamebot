@@ -9,32 +9,38 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
+import static com.github.simplegamebot.Debugger.printProfile;
 import static com.github.simplegamebot.State.*;
+import static com.github.simplegamebot.Keyboard.*;
 
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
-    private final TelegramClient telegramClient;
-    private HashMap<String, State> allUsers;
-    private HashMap<State, ReplyKeyboardMarkup> allKeyboards;
-    private ReplyKeyboardMarkup currentMarkup;
+    private TelegramClient telegramClient;
+    private HashMap<String, Profile> allUsers;
+    private HashMap<State, Keyboard> allKeyboards;
+    private ProfileManager PM;
+    private List<State> settingStates;
 
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
         allUsers = new HashMap<>();
 
-        KeyboardBuilder BUILDER = new KeyboardBuilder();
-
         allKeyboards = new HashMap<>();
 
-        allKeyboards.put(USER_STATE_GENDER, BUILDER.buildKeyboard(USER_STATE_GENDER));
-        allKeyboards.put(USER_STATE_MAIN_MENU, BUILDER.buildKeyboard(USER_STATE_MAIN_MENU));
-        allKeyboards.put(USER_STATE_FINDING, BUILDER.buildKeyboard(USER_STATE_FINDING));
-        allKeyboards.put(EMPTY, BUILDER.buildKeyboard(EMPTY));
+        allKeyboards.put(USER_GENDER, GENDER_KEYBOARD);
+        allKeyboards.put(USER_STATE_MAIN_MENU, MAIN_MENU_KEYBOARD);
+        allKeyboards.put(USER_STATE_FINDING, FINDING_KEYBOARD);
+        allKeyboards.put(EMPTY, EMPTY_KEYBOARD);
 
-        currentMarkup = allKeyboards.get("empty");
+        settingStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
 
-        Communicator proba = new Communicator();
+//        Communicator proba = new Communicator();
+        PM = new ProfileManager(); // profile manager
 
     }
 
@@ -49,66 +55,26 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
             if (messageText.compareTo("/start") == 0) {
                 if (!allUsers.containsKey(chatId))
-                    allUsers.put(chatId, USER_STATE_START);
+                    allUsers.put(chatId, new Profile(chatId, USER_NAME));
                     botReply.setText("Давай заполним Твою анкету\nВведи имя:");
             }
 
             else {
                 if (allUsers.containsKey(chatId)) {
-                    switch (allUsers.get(chatId)) {
 
-                        case USER_STATE_START:
-                            // здеся нада записать фио человека
-                            allUsers.replace(chatId, USER_STATE_AGE);
-                            botReply.setText("Введи возраст (число):");
-                            break;
+                    if (settingStates.contains(allUsers.get(chatId).getUserState())) {
+                        PM.changeProfileLocal(userMessage, allUsers.get(chatId), botReply);
+                    }
 
-                        case USER_STATE_AGE:
-                            int age = StringFunctions.isNum(messageText);
-                            if (age != -1) {
-                                if ((age >= 14) && (age <= 50)) {
-                                    // здеся нада записать др человека
-                                    allUsers.replace(chatId, USER_STATE_CITY);
-                                    botReply.setText("Введи свой город:");
-                                    break;
-                                }
-                            }
-                            botReply.setText("Твой возраст должен быть числом от 14 лет ");
-                            break;
-
-                        case USER_STATE_CITY:
-                            // здеся нада записать город человека
-                            allUsers.replace(chatId, USER_STATE_GENDER);
-                            botReply.setText("Введи пол:");
-                            currentMarkup = allKeyboards.get(USER_STATE_GENDER);
-                            break;
-
-
-                        case USER_STATE_GENDER:
-                            if ((messageText.compareTo("Парень") == 0) || (messageText.compareTo("Девушка") == 0)) {
-                                currentMarkup = allKeyboards.get("empty");
-                                // здеся нада записать пол человека
-                                allUsers.replace(chatId, USER_STATE_INFO);
-                                botReply.setText("Введи о себе:");
-                                break;
-                            }
-                            botReply.setText("Неправильный ввод");
-                            break;
-
-                        case USER_STATE_INFO:
-                            // здеся нада записать "о себе" человека
-                            allUsers.replace(chatId, USER_STATE_MAIN_MENU);
-                            botReply.setText("Анкета готова");
-                            currentMarkup = allKeyboards.get(USER_STATE_MAIN_MENU);
-                            break;
-
-                        default:
-                            botReply.setText("Выберите команду на клавиатуре");
-                            break;
+                    else {
+                        try {
+                            printProfile(allUsers.get(chatId));
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
 
-                botReply.setReplyMarkup(currentMarkup);
             }
 
             try {
