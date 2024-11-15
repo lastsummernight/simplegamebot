@@ -10,13 +10,13 @@ import static com.github.simplegamebot.State.*;
 
 public class KeyboardBuilder {
 
-    public ReplyKeyboardMarkup buildKeyboard(State key) {
+    public static ReplyKeyboardMarkup buildKeyboard(State key) {
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
 
         switch (key) {
-            case USER_STATE_GENDER:
+            case USER_GENDER:
                 keyboardRow.add("Парень");
                 keyboardRow.add("Девушка");
                 keyboard.add(keyboardRow);
@@ -43,7 +43,7 @@ public class KeyboardBuilder {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboard);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
-        if (key == USER_STATE_GENDER)
+        if (key == USER_GENDER)
             replyKeyboardMarkup.setOneTimeKeyboard(true);
 
         return replyKeyboardMarkup;
