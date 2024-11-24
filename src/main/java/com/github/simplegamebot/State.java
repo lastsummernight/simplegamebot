@@ -1,7 +1,5 @@
 package com.github.simplegamebot;
 
-import org.telegram.telegrambots.meta.api.objects.User;
-
 public enum State {
 
     USER_NAME,
