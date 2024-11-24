@@ -1,8 +1,8 @@
-package com.github.simplegamebot;
+package com.github.datingbot.keyboard;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
-import static com.github.simplegamebot.State.*;
+import static com.github.datingbot.auxiliary.State.*;
 
 public enum Keyboard {
 

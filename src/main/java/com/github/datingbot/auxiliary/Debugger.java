@@ -1,4 +1,6 @@
-package com.github.simplegamebot;
+package com.github.datingbot.auxiliary;
+
+import com.github.datingbot.profile.Profile;
 
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;

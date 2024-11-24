@@ -1,13 +1,12 @@
-package com.github.simplegamebot;
+package com.github.datingbot.profile;
 
+import com.github.datingbot.auxiliary.StringFunctions;
+import com.github.datingbot.database.DatabaseManager;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static com.github.simplegamebot.Keyboard.*;
-import static com.github.simplegamebot.State.*;
+import static com.github.datingbot.keyboard.Keyboard.*;
+import static com.github.datingbot.auxiliary.State.*;
 
 public class ProfileManager {
 

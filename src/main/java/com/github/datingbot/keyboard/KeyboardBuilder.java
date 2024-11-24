@@ -1,12 +1,13 @@
-package com.github.simplegamebot;
+package com.github.datingbot.keyboard;
 
+import com.github.datingbot.auxiliary.State;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.simplegamebot.State.*;
+import static com.github.datingbot.auxiliary.State.*;
 
 public class KeyboardBuilder {
 

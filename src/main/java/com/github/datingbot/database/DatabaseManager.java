@@ -1,13 +1,13 @@
-package com.github.simplegamebot;
+package com.github.datingbot.database;
+
+import com.github.datingbot.auxiliary.Debugger;
+import com.github.datingbot.profile.Profile;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.*;
-import java.lang.Cloneable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import static com.github.simplegamebot.State.USER_STATE_MAIN_MENU;
+import static com.github.datingbot.auxiliary.State.USER_STATE_MAIN_MENU;
 
 public class DatabaseManager {
     private static final String URL = "jdbc:mysql://localhost:3306/datingbotdb";

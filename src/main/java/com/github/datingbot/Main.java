@@ -1,4 +1,6 @@
-package com.github.simplegamebot;
+package com.github.datingbot;
+import com.github.datingbot.auxiliary.token;
+import com.github.datingbot.database.DatabaseManager;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 public class Main {

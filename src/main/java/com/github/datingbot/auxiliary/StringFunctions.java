@@ -1,4 +1,4 @@
-package com.github.simplegamebot;
+package com.github.datingbot.auxiliary;
 
 public class StringFunctions
 {

@@ -1,23 +1,26 @@
-package com.github.simplegamebot;
+package com.github.datingbot;
 
+import com.github.datingbot.auxiliary.State;
+import com.github.datingbot.database.DatabaseManager;
+import com.github.datingbot.keyboard.Keyboard;
+import com.github.datingbot.profile.Profile;
+import com.github.datingbot.profile.ProfileManager;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.github.simplegamebot.Debugger.printProfile;
-import static com.github.simplegamebot.State.*;
-import static com.github.simplegamebot.Keyboard.*;
+import static com.github.datingbot.auxiliary.Debugger.printProfile;
+import static com.github.datingbot.auxiliary.State.*;
+import static com.github.datingbot.keyboard.Keyboard.*;
 
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private TelegramClient telegramClient;

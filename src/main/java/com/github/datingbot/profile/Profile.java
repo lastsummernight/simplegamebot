@@ -1,4 +1,6 @@
-package com.github.simplegamebot;
+package com.github.datingbot.profile;
+
+import com.github.datingbot.auxiliary.State;
 
 public class Profile {
 
