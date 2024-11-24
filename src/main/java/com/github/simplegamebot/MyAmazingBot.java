@@ -28,7 +28,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
-        allUsers = new HashMap<>();
+        allUsers = DatabaseManager.getAllUsers();
 
         allKeyboards = new HashMap<>();
 
@@ -38,9 +38,6 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         allKeyboards.put(EMPTY, EMPTY_KEYBOARD);
 
         settingStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
-
-//        Communicator proba = new Communicator();
-        PM = new ProfileManager(); // profile manager
 
     }
 
@@ -63,7 +60,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                 if (allUsers.containsKey(chatId)) {
 
                     if (settingStates.contains(allUsers.get(chatId).getUserState())) {
-                        PM.changeProfileLocal(userMessage, allUsers.get(chatId), botReply);
+                        ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId), botReply);
                     }
 
                     else {
@@ -74,7 +71,6 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                         }
                     }
                 }
-
             }
 
             try {
