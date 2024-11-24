@@ -9,10 +9,32 @@ public class Profile {
     private String info;
     private State userState;
     private String chatId;
+    private boolean changed = false;
 
     public Profile(String id, State state) {
         chatId = id;
         userState = state;
+    }
+
+    public Profile(String id, State state, String name, int age, String city, boolean gender, String info) {
+        chatId = id;
+        userState = state;
+        username = name;
+        this.age = age;
+        this.city = city;
+        if (gender)
+            this.gender = "Парень";
+        else
+            this.gender = "Девушка";
+        this.info = info;
+    }
+
+    public boolean getChanged() {
+        return changed;
+    }
+
+    public void setChanged(boolean temp) {
+        changed = temp;
     }
 
     public String getChatId() {
