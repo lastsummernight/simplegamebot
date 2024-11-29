@@ -32,6 +32,16 @@ public class Message {
         keyboard = EMPTY_KEYBOARD;
     }
 
+    public void reset(String message) {
+        this.message = message;
+        keyboard = EMPTY_KEYBOARD;
+    }
+
+    public void reset(String message, Keyboard keyboard) {
+        this.message = message;
+        this.keyboard = keyboard;
+    }
+
     public SendMessage execute() {
         SendMessage temp = new SendMessage(chatId, message);
         temp.setReplyMarkup(keyboard.getKeyboardMarkup());
@@ -55,8 +65,6 @@ public class Message {
     }
 
     public void setMessage(String message) {
-        System.out.println("|||DEBUG message before: " + this.message);
         this.message = message;
-        System.out.println("|||DEBUG message after: " + this.message);
     }
 }

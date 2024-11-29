@@ -43,26 +43,22 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             String chatId = userMessage.getChatId().toString();
             SendMessage botAnswer = null;
 
-            if (messageText.compareTo("/start") == 0) {
-                if (!allUsers.containsKey(chatId))
-                    System.out.println("||| DEBUG ||| allusers contains chatId" + chatId);
-                    allUsers.put(chatId, new Profile(chatId, USER_NAME));
-                    MessageBuilder.createMessage(chatId);
-                    MessageBuilder.setText(chatId, "Давай заполним Твою анкету\nВведи имя:");
+            if (!allUsers.containsKey(chatId)) {
+                System.out.println("||| DEBUG ||| allusers contains chatId" + chatId);
+                allUsers.put(chatId, new Profile(chatId, USER_NAME));
+                MessageBuilder.createMessage(chatId);
+                MessageBuilder.usualMessage(chatId, "Давай заполним Твою анкету\nВведи имя:");
             }
 
             else {
-                if (allUsers.containsKey(chatId)) {
+                if (registrationStates.contains(allUsers.get(chatId).getUserState())) {
+                    ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId));
+                }
 
-                    if (registrationStates.contains(allUsers.get(chatId).getUserState())) {
-                        ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId));
-                    }
-
-                    else {
-                        if (messageText.compareTo("/s") == 0) MessageBuilder.setText(chatId, "Не выбирай ничего");
-                        else MessageBuilder.setText(chatId, "Выбери команду на клавиатуре");
-                        printProfile(allUsers.get(chatId));
-                    }
+                else {
+                    if (messageText.compareTo("/s") == 0) MessageBuilder.usualMessage(chatId, "Не выбирай ничего");
+                    else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре");
+                    printProfile(allUsers.get(chatId));
                 }
             }
 
