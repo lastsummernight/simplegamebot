@@ -1,6 +1,5 @@
-package com.github.datingbot;
+package com.github.datingbot.message;
 
-import com.github.datingbot.auxiliary.CustomException;
 import com.github.datingbot.auxiliary.Debugger;
 import com.github.datingbot.auxiliary.MyException;
 import com.github.datingbot.keyboard.Keyboard;
@@ -8,9 +7,7 @@ import com.github.datingbot.profile.Profile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static com.github.datingbot.auxiliary.CustomException.*;
 

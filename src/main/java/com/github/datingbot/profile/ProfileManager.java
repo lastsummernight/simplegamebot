@@ -1,6 +1,6 @@
 package com.github.datingbot.profile;
 
-import com.github.datingbot.MessageBuilder;
+import com.github.datingbot.message.MessageBuilder;
 import com.github.datingbot.auxiliary.StringFunctions;
 import com.github.datingbot.database.DatabaseManager;
 import org.telegram.telegrambots.meta.api.objects.message.Message;

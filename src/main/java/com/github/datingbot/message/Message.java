@@ -1,4 +1,4 @@
-package com.github.datingbot;
+package com.github.datingbot.message;
 
 import com.github.datingbot.keyboard.Keyboard;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

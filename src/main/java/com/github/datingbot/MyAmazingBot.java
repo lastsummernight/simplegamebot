@@ -4,7 +4,7 @@ import com.github.datingbot.auxiliary.Debugger;
 import com.github.datingbot.auxiliary.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.database.DatabaseManager;
-import com.github.datingbot.keyboard.Keyboard;
+import com.github.datingbot.message.MessageBuilder;
 import com.github.datingbot.profile.Profile;
 import com.github.datingbot.profile.ProfileManager;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
@@ -15,15 +15,12 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.github.datingbot.auxiliary.CustomException.MBUILDERMAPCONTAINSKEY;
 import static com.github.datingbot.auxiliary.Debugger.printProfile;
 import static com.github.datingbot.auxiliary.State.*;
-import static com.github.datingbot.keyboard.Keyboard.*;
 
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private TelegramClient telegramClient;
