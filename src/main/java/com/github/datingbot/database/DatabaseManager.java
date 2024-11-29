@@ -115,21 +115,5 @@ public class DatabaseManager {
             }
         }
     }
-
-    public static void main(String[] args) {
-        connectDB();
-//        addUser("1231", "Вася", 18, "Moscow", "Парень", "asdfhjhklg");
-//        addUser("12313", "Вася", 18, "Moscow", "Парень", "asdfhjhklg");
-//        changeUser("12313", "Вася", 18, "Moscow", "Девушка", "лофыврафоырвар");
-        HashMap<String, Profile> temp = getAllUsers();
-        for (String t : temp.keySet()) {
-            try {
-                Debugger.printProfile(temp.get(t));
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        closeConnectDB();
-    }
 }
 

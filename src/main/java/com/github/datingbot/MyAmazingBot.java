@@ -1,5 +1,7 @@
 package com.github.datingbot;
 
+import com.github.datingbot.auxiliary.Debugger;
+import com.github.datingbot.auxiliary.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.database.DatabaseManager;
 import com.github.datingbot.keyboard.Keyboard;
@@ -18,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.github.datingbot.auxiliary.CustomException.MBUILDERMAPCONTAINSKEY;
 import static com.github.datingbot.auxiliary.Debugger.printProfile;
 import static com.github.datingbot.auxiliary.State.*;
 import static com.github.datingbot.keyboard.Keyboard.*;
@@ -25,23 +28,14 @@ import static com.github.datingbot.keyboard.Keyboard.*;
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private TelegramClient telegramClient;
     private HashMap<String, Profile> allUsers;
-    private HashMap<State, Keyboard> allKeyboards;
-    private ProfileManager PM;
-    private List<State> settingStates;
+    private List<State> registrationStates;
 
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
         allUsers = DatabaseManager.getAllUsers();
-
-        allKeyboards = new HashMap<>();
-
-        allKeyboards.put(USER_GENDER, GENDER_KEYBOARD);
-        allKeyboards.put(USER_STATE_MAIN_MENU, MAIN_MENU_KEYBOARD);
-        allKeyboards.put(USER_STATE_FINDING, FINDING_KEYBOARD);
-        allKeyboards.put(EMPTY, EMPTY_KEYBOARD);
-
-        settingStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
-
+        registrationStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
+        Debugger.setUp();
+        MessageBuilder.setUp(allUsers);
     }
 
     @Override
@@ -50,34 +44,41 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             Message userMessage = update.getMessage();
             String messageText = userMessage.getText();
             String chatId = userMessage.getChatId().toString();
-
-            SendMessage botReply = new SendMessage(chatId, messageText);
+            SendMessage botAnswer = null;
 
             if (messageText.compareTo("/start") == 0) {
                 if (!allUsers.containsKey(chatId))
+                    System.out.println("||| DEBUG ||| allusers contains chatId" + chatId);
                     allUsers.put(chatId, new Profile(chatId, USER_NAME));
-                    botReply.setText("Давай заполним Твою анкету\nВведи имя:");
+                    MessageBuilder.createMessage(chatId);
+                    MessageBuilder.setText(chatId, "Давай заполним Твою анкету\nВведи имя:");
             }
 
             else {
                 if (allUsers.containsKey(chatId)) {
 
-                    if (settingStates.contains(allUsers.get(chatId).getUserState())) {
-                        ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId), botReply);
+                    if (registrationStates.contains(allUsers.get(chatId).getUserState())) {
+                        ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId));
                     }
 
                     else {
-                        try {
-                            printProfile(allUsers.get(chatId));
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
+                        if (messageText.compareTo("/s") == 0) MessageBuilder.setText(chatId, "Не выбирай ничего");
+                        else MessageBuilder.setText(chatId, "Выбери команду на клавиатуре");
+                        printProfile(allUsers.get(chatId));
                     }
                 }
             }
 
             try {
-                telegramClient.execute(botReply);
+                botAnswer = MessageBuilder.execute(chatId);
+            }
+            catch (MyException e) {
+                Debugger.printException(e);
+                botAnswer = new SendMessage(chatId, "Exception caused");
+            }
+
+            try {
+                telegramClient.execute(botAnswer);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
