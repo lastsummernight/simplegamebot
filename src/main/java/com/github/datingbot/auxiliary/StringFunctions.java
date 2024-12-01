@@ -9,4 +9,10 @@ public class StringFunctions
             return -1;
         }
     }
+
+    public static String yearsOld(int age) {
+        if (age % 10 == 1) return age + " год";
+        else if (age % 10 > 1 && age % 10 < 5) return age + " года";
+        else return age + " лет";
+    }
 }
