@@ -1,6 +1,7 @@
 package com.github.datingbot.profile;
 
 import com.github.datingbot.auxiliary.State;
+import com.github.datingbot.auxiliary.StringFunctions;
 
 public class Profile {
 
@@ -11,7 +12,7 @@ public class Profile {
     private String info;
     private State userState;
     private String chatId;
-    private boolean changed = false;
+    private State tempInfo = null;
 
     public Profile(String id, State state) {
         chatId = id;
@@ -31,12 +32,16 @@ public class Profile {
         this.info = info;
     }
 
-    public boolean getChanged() {
-        return changed;
+    public void setTempInfo(State temp) {
+        tempInfo = temp;
     }
 
-    public void setChanged(boolean temp) {
-        changed = temp;
+    public State getTempInfo() {
+        return tempInfo;
+    }
+
+    public String getStr() {
+        return username + ' ' + StringFunctions.yearsOld(age) + " (" + gender + ")\nГород: " + city + "\n" + info;
     }
 
     public String getChatId() {
