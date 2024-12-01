@@ -9,6 +9,7 @@ public enum Keyboard {
     GENDER_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_GENDER)),
     MAIN_MENU_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_STATE_MAIN_MENU)),
     FINDING_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_STATE_FINDING)),
+    PROFILE_CHANGE(KeyboardBuilder.buildKeyboard(USER_PROFILE)),
     EMPTY_KEYBOARD(KeyboardBuilder.buildKeyboard(EMPTY));
 
     private ReplyKeyboardMarkup keyboardMarkup;

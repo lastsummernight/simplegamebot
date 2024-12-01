@@ -36,6 +36,20 @@ public class KeyboardBuilder {
                 keyboard.add(keyboardRow);
                 break;
 
+            case USER_PROFILE:
+                keyboardRow.add("Имя");
+                keyboardRow.add("Возраст");
+                keyboardRow.add("Город");
+
+                keyboard.add(keyboardRow);
+                keyboardRow = new KeyboardRow();
+
+                keyboardRow.add("Пол");
+                keyboardRow.add("О себе");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
             case EMPTY:
                 keyboard.add(keyboardRow);
                 break;
