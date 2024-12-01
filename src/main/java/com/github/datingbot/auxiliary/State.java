@@ -9,5 +9,7 @@ public enum State {
     USER_INFO,
     USER_STATE_MAIN_MENU,
     USER_STATE_FINDING,
+    USER_PROFILE,
     EMPTY;
+
 }
