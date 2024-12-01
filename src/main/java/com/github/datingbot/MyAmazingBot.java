@@ -4,6 +4,7 @@ import com.github.datingbot.auxiliary.Debugger;
 import com.github.datingbot.auxiliary.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.database.DatabaseManager;
+import com.github.datingbot.keyboard.Keyboard;
 import com.github.datingbot.message.MessageBuilder;
 import com.github.datingbot.profile.Profile;
 import com.github.datingbot.profile.ProfileManager;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import org.w3c.dom.ls.LSOutput;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,15 +23,24 @@ import java.util.List;
 
 import static com.github.datingbot.auxiliary.Debugger.printProfile;
 import static com.github.datingbot.auxiliary.State.*;
+import static com.github.datingbot.keyboard.Keyboard.*;
 
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private TelegramClient telegramClient;
     private HashMap<String, Profile> allUsers;
+    private HashMap<String, State> servicePrompts;
     private List<State> registrationStates;
 
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
         allUsers = DatabaseManager.getAllUsers();
+        servicePrompts = new HashMap<>();
+        servicePrompts.put("Имя", USER_NAME);
+        servicePrompts.put("Возраст", USER_AGE);
+        servicePrompts.put("Город", USER_CITY);
+        servicePrompts.put("Пол", USER_GENDER);
+        servicePrompts.put("О себе", USER_INFO);
+        servicePrompts.put("Назад", USER_STATE_MAIN_MENU);
         registrationStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
         Debugger.setUp();
         MessageBuilder.setUp(allUsers);
@@ -44,7 +55,6 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             SendMessage botAnswer = null;
 
             if (!allUsers.containsKey(chatId)) {
-                System.out.println("||| DEBUG ||| allusers contains chatId" + chatId);
                 allUsers.put(chatId, new Profile(chatId, USER_NAME));
                 MessageBuilder.createMessage(chatId);
                 MessageBuilder.usualMessage(chatId, "Давай заполним Твою анкету\nВведи имя:");
@@ -55,9 +65,36 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                     ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId));
                 }
 
+                else if (allUsers.get(chatId).getUserState() == USER_PROFILE) {
+                    // служебные | контекстная
+                    if (messageText.compareTo("Назад") == 0) {
+                        allUsers.get(chatId).setTempInfo(null);
+                        allUsers.get(chatId).setUserState(USER_STATE_MAIN_MENU);
+                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD);
+                    }
+                    else {
+                        if (servicePrompts.containsKey(messageText)) {
+                            allUsers.get(chatId).setTempInfo(servicePrompts.get(messageText));
+                            if (messageText.compareTo("Пол") == 0)
+                                MessageBuilder.usualMessage(chatId, "Выбери пол :", GENDER_KEYBOARD);
+                            else MessageBuilder.usualMessage(chatId, "Введи " + messageText.toLowerCase() + ':');
+                        }
+                        else {
+                            ProfileManager.useProfile(allUsers.get(chatId), userMessage);
+                            if (allUsers.get(chatId).getTempInfo() == EMPTY)
+                                ProfileManager.emptyState(allUsers.get(chatId));
+                        }
+                    }
+                }
+
                 else {
                     if (messageText.compareTo("/s") == 0) MessageBuilder.usualMessage(chatId, "Не выбирай ничего");
-                    else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре");
+                    else if (messageText.compareTo("Моя анкета") == 0) {
+                        allUsers.get(chatId).setUserState(USER_PROFILE);
+                        allUsers.get(chatId).setTempInfo(EMPTY);
+                        ProfileManager.useProfile(allUsers.get(chatId), userMessage);
+                    }
+                    else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD);
                     printProfile(allUsers.get(chatId));
                 }
             }
