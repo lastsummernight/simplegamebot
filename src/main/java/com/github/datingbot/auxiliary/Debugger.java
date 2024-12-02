@@ -25,6 +25,7 @@ public class Debugger {
         printStream.println("   City = " + profile.getCity());
         printStream.println("   Gender = " + profile.getGender());
         printStream.println("   Info = " + profile.getInfo());
+        printStream.println("   Friends = " + profile.getStrFriends());
         printStream.println("}");
     }
 

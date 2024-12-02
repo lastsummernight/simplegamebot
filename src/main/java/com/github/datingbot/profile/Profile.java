@@ -3,6 +3,10 @@ package com.github.datingbot.profile;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Profile {
 
     private String username;
@@ -12,14 +16,16 @@ public class Profile {
     private String info;
     private State userState;
     private String chatId;
+    private List<String> friends;
     private State tempInfo = null;
 
     public Profile(String id, State state) {
         chatId = id;
         userState = state;
+        friends = new ArrayList<>();
     }
 
-    public Profile(String id, State state, String name, int age, String city, boolean gender, String info) {
+    public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends) {
         chatId = id;
         userState = state;
         username = name;
@@ -30,6 +36,20 @@ public class Profile {
         else
             this.gender = "Девушка";
         this.info = info;
+        if (friends != null)
+            this.friends = new ArrayList<>(Arrays.asList(friends.split(",")));
+        else
+            this.friends = new ArrayList<>();
+    }
+
+    public String getStrFriends() {
+        if (friends.isEmpty())
+            return "";
+        return String.join(",", friends);
+    }
+
+    public List<String> getFriends() {
+        return friends;
     }
 
     public void setTempInfo(State temp) {

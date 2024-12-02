@@ -3,6 +3,7 @@ package com.github.datingbot;
 import com.github.datingbot.auxiliary.Debugger;
 import com.github.datingbot.auxiliary.MyException;
 import com.github.datingbot.auxiliary.State;
+import com.github.datingbot.auxiliary.StringFunctions;
 import com.github.datingbot.database.DatabaseManager;
 import com.github.datingbot.keyboard.Keyboard;
 import com.github.datingbot.message.MessageBuilder;
@@ -53,49 +54,102 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             String messageText = userMessage.getText();
             String chatId = userMessage.getChatId().toString();
             SendMessage botAnswer = null;
+            Profile currentUser = allUsers.get(chatId);
 
-            if (!allUsers.containsKey(chatId)) {
+            // FOR NEW USERS
+            if (currentUser == null) {
                 allUsers.put(chatId, new Profile(chatId, USER_NAME));
-                MessageBuilder.createMessage(chatId);
-                MessageBuilder.usualMessage(chatId, "Давай заполним Твою анкету\nВведи имя:");
+                MessageBuilder.usualMessage(chatId, "Давай заполним Твою анкету\nВведи имя:"); // MESSAGE
             }
 
             else {
-                if (registrationStates.contains(allUsers.get(chatId).getUserState())) {
-                    ProfileManager.changeProfileLocal(userMessage, allUsers.get(chatId));
+                // USER WITH STATE REGISTRATION
+                if (registrationStates.contains(currentUser.getUserState())) {
+                    ProfileManager.changeProfileLocal(userMessage, currentUser); // REGISTRATION WITH MESSAGES
                 }
 
-                else if (allUsers.get(chatId).getUserState() == USER_PROFILE) {
+                // USER WITH STATE OF BUTTON "МОЯ АНКЕТА"
+                else if (currentUser.getUserState() == USER_PROFILE) {
+                    if (messageText.compareTo("Назад") == 0) {
+                        currentUser.setUserState(USER_STATE_MAIN_MENU);
+                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+                    }
+                    else if (messageText.compareTo("Изменить профиль") == 0) {
+                        currentUser.setUserState(USER_PROFILE_CHANGE);
+                        currentUser.setTempInfo(EMPTY);
+                        ProfileManager.useProfile(currentUser, userMessage); // MESSAGE ???
+                    }
+                    else MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_PROFILE); // MESSAGE
+                }
+
+                else if (currentUser.getUserState() == USER_PROFILE_CHANGE) {
                     // служебные | контекстная
                     if (messageText.compareTo("Назад") == 0) {
-                        allUsers.get(chatId).setTempInfo(null);
-                        allUsers.get(chatId).setUserState(USER_STATE_MAIN_MENU);
-                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD);
+                        currentUser.setTempInfo(EMPTY);
+                        currentUser.setUserState(USER_PROFILE);
+                        MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE);
                     }
                     else {
                         if (servicePrompts.containsKey(messageText)) {
-                            allUsers.get(chatId).setTempInfo(servicePrompts.get(messageText));
+                            currentUser.setTempInfo(servicePrompts.get(messageText));
                             if (messageText.compareTo("Пол") == 0)
-                                MessageBuilder.usualMessage(chatId, "Выбери пол :", GENDER_KEYBOARD);
-                            else MessageBuilder.usualMessage(chatId, "Введи " + messageText.toLowerCase() + ':');
+                                MessageBuilder.usualMessage(chatId, "Выбери пол :", GENDER_KEYBOARD); // MESSAGE
+                            else MessageBuilder.usualMessage(chatId, "Введи " + messageText.toLowerCase() + ':'); // MESSAGE
                         }
                         else {
-                            ProfileManager.useProfile(allUsers.get(chatId), userMessage);
-                            if (allUsers.get(chatId).getTempInfo() == EMPTY)
-                                ProfileManager.emptyState(allUsers.get(chatId));
+                            ProfileManager.useProfile(allUsers.get(chatId), userMessage); // MESSAGE ???
+                            if (currentUser.getTempInfo() == EMPTY)
+                                ProfileManager.emptyState(currentUser); // MESSAGE BY DEFAULT ???
                         }
                     }
                 }
 
-                else {
-                    if (messageText.compareTo("/s") == 0) MessageBuilder.usualMessage(chatId, "Не выбирай ничего");
-                    else if (messageText.compareTo("Моя анкета") == 0) {
-                        allUsers.get(chatId).setUserState(USER_PROFILE);
-                        allUsers.get(chatId).setTempInfo(EMPTY);
-                        ProfileManager.useProfile(allUsers.get(chatId), userMessage);
+                // USER WITH STATE OF BUTTON "ДИАЛОГИ"
+                else if (currentUser.getUserState() == USER_MESSAGES) {
+                    if (messageText.compareTo("Назад") == 0) {
+                        currentUser.setUserState(USER_STATE_MAIN_MENU);
+                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
                     }
-                    else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD);
-                    printProfile(allUsers.get(chatId));
+                    else if (messageText.compareTo("Выбрать диалог") == 0) {
+                        currentUser.setUserState(USER_MESSAGES_CHOOSE);
+                        MessageBuilder.usualMessage(chatId, "Введи порядковый номер диалога", BACK); // MESSAGE
+                    }
+                    else MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_MESSAGES); // MESSAGE
+                }
+
+                else if (currentUser.getUserState() == USER_MESSAGES_CHOOSE) {
+                    int num = StringFunctions.isNum(messageText);
+                    if (messageText.compareTo("Назад") == 0) {
+                        currentUser.setUserState(USER_STATE_MAIN_MENU);
+                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+                    }
+                    else if (num != -1) {
+                        if (num > 0 && num <= currentUser.getFriends().size()) {
+                            MessageBuilder.usualMessage(chatId, "Вы выбрали пользователя "
+                                    + currentUser.getFriends().get(num - 1), BACK); // MESSAGE
+                            // EXTRA LOGIC
+                        }
+                        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK); // MESSAGE
+                    }
+                    else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK); // MESSAGE
+                }
+
+                // IN OTHER STATES
+                else {
+                    // CHANGES STATE TO USER_PROFILE + EXTRA INFO
+                    if (messageText.compareTo("Моя анкета") == 0) {
+                        currentUser.setUserState(USER_PROFILE);
+                        MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE);
+                    }
+                    // CHANGES STATE TO USER_MESSAGES
+                    else if (messageText.compareTo("Сообщения") == 0) {
+                        currentUser.setUserState(USER_MESSAGES);
+                        MessageBuilder.usualMessage(chatId, "Ваши сообщения:\n"
+                                + StringFunctions.formatFriends(currentUser.getFriends()), VIEW_MESSAGES); // MESSAGE
+                    }
+                    // UNKNOWN MESSAGE
+                    else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+                    printProfile(currentUser);
                 }
             }
 

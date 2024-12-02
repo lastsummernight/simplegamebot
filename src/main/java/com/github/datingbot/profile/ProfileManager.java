@@ -85,7 +85,7 @@ public class ProfileManager {
     }
 
     public static void emptyState(Profile profile) {
-        String textProfile = profile.getStr() + "\nИзменить профиль?";
+        String textProfile = profile.getStr();
         MessageBuilder.usualMessage(profile.getChatId(), textProfile, PROFILE_CHANGE);
     }
 

@@ -36,16 +36,18 @@ public class DatabaseManager {
 
             while (resultSet.next()) {
 
-                String user_id = Integer.toString(resultSet.getInt("user_id"));
-                String user_name = resultSet.getString("name");
-                int user_age = resultSet.getInt("age");
-                String user_city = resultSet.getString("city");
-                boolean user_gender = resultSet.getBoolean("gender");
-                String user_info = resultSet.getString("info");
+                String userId = Integer.toString(resultSet.getInt("user_id"));
+                String userName = resultSet.getString("name");
+                int userAge = resultSet.getInt("age");
+                String userCity = resultSet.getString("city");
+                boolean userGender = resultSet.getBoolean("gender");
+                String userInfo = resultSet.getString("info");
+                String userFriends = resultSet.getString("friends");
+                System.out.println(userFriends);
 
-                Profile user = new Profile(user_id, USER_STATE_MAIN_MENU, user_name, user_age, user_city, user_gender, user_info);
+                Profile user = new Profile(userId, USER_STATE_MAIN_MENU, userName, userAge, userCity, userGender, userInfo, userFriends);
 
-                allUsers.put(user_id, user);
+                allUsers.put(userId, user);
             }
 
             resultSet.close();
@@ -59,7 +61,7 @@ public class DatabaseManager {
     }
 
     public static void addUser(Profile profile) {
-        String query = "INSERT INTO users (user_id, name, age, city, gender, info) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = user_id";
+        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = user_id";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -73,6 +75,7 @@ public class DatabaseManager {
             else
                 preparedStatement.setString(5, "0");
             preparedStatement.setString(6, profile.getInfo());
+            preparedStatement.setString(7, profile.getStrFriends());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) inserted.");
@@ -83,7 +86,7 @@ public class DatabaseManager {
 
 
     public static void changeUser(Profile profile) {
-        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ? WHERE user_id = ?";
+        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ? WHERE user_id = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -97,6 +100,7 @@ public class DatabaseManager {
                 preparedStatement.setString(4, "0");
             preparedStatement.setString(5, profile.getInfo());
             preparedStatement.setString(6, profile.getChatId());
+            preparedStatement.setString(7, profile.getStrFriends());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) updated.");

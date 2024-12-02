@@ -37,6 +37,18 @@ public class KeyboardBuilder {
                 break;
 
             case USER_PROFILE:
+                keyboardRow.add("Изменить профиль");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
+            case USER_MESSAGES:
+                keyboardRow.add("Выбрать диалог");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
+            case USER_PROFILE_CHANGE:
                 keyboardRow.add("Имя");
                 keyboardRow.add("Возраст");
                 keyboardRow.add("Город");
@@ -46,6 +58,11 @@ public class KeyboardBuilder {
 
                 keyboardRow.add("Пол");
                 keyboardRow.add("О себе");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
+            case USER_MESSAGES_CHOOSE:
                 keyboardRow.add("Назад");
                 keyboard.add(keyboardRow);
                 break;
