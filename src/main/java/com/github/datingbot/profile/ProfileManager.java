@@ -79,18 +79,6 @@ public class ProfileManager {
         }
     }
 
-//    private static void sendProfile(Message message, Profile profile, SendMessage botReply){
-//        if (message.getText().compareTo("Назад") == 0) {
-//            botReply.setReplyMarkup(MAIN_MENU_KEYBOARD.getKeyboardMarkup());
-//        }
-//        else{
-//
-//            //botReply.setText("Выберите команду на клавиатуре");
-//        }
-//
-//    }
-
-
     public static void changeProfileGlobal(Profile profile) {
         //DatabaseManager.changeUser(profile);
     }
