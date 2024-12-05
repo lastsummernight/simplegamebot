@@ -15,7 +15,12 @@ public class Profile {
     private State userState;
     private String chatId;
     private List<String> friends;
+
     private Set<String> watchedProfiles;
+
+    private Set<String> notLovedBy;//Пользователи которые отвергли этот профиль
+
+    private String lastViewedProfile;
 
     private State tempInfo = null;
 
@@ -24,6 +29,8 @@ public class Profile {
         userState = state;
         friends = new ArrayList<>();
         watchedProfiles = new HashSet<>();
+        watchedProfiles.add(chatId);
+        notLovedBy = new HashSet<>();
     }
 
     public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends) {
@@ -51,6 +58,18 @@ public class Profile {
 
     public List<String> getFriends() {
         return friends;
+    }
+
+    public void addFriend(String anothersUserChatId) {
+        if (!(friends.contains(anothersUserChatId))) {
+            friends.add(anothersUserChatId);
+        }
+    }
+
+    public void deleteFriend(String anothersUserChatId) {
+        if (friends.contains(anothersUserChatId)) {
+            friends.remove(anothersUserChatId);
+        }
     }
 
     public void setTempInfo(State temp) {
@@ -119,6 +138,30 @@ public class Profile {
 
     public Set<String> getWatchedProfiles() { return watchedProfiles; }
 
-    public void setWatchedProfiles(Set<String> watchedProfiles) { this.watchedProfiles = watchedProfiles; }
+    public void addWatchedProfile(String anothersUserChatId) {
+        this.watchedProfiles.add(anothersUserChatId);
+    }
+
+    public String getLastViewedProfile() { return lastViewedProfile; }
+
+    public void setLastViewedProfile(String lastViewedProfile) { this.lastViewedProfile = lastViewedProfile; }
+
+    public void deleteWatchedProfiles() {
+        this.watchedProfiles.clear();
+        watchedProfiles.add(chatId);
+    }
+
+    public Set<String> getNotLovedBy() {
+        return notLovedBy;
+    }
+
+    public void addNotLovedBy(String anothersUserChatId) {
+        this.notLovedBy.add(anothersUserChatId);
+    }
+
+    public void deleteNotLovedBy(Set<String> notLovedBy) {
+        this.notLovedBy.clear();
+    }
+
 
 }
