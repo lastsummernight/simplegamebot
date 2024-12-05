@@ -5,6 +5,7 @@ import com.github.datingbot.auxiliary.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
 //import com.github.datingbot.database.DatabaseManager;
+import com.github.datingbot.matching.Matcher;
 import com.github.datingbot.message.MessageBuilder;
 import com.github.datingbot.profile.Profile;
 import com.github.datingbot.profile.ProfileManager;
@@ -16,9 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static com.github.datingbot.auxiliary.Debugger.printProfile;
 import static com.github.datingbot.auxiliary.State.*;
@@ -29,10 +28,12 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     public HashMap<String, Profile> allUsers;
     private HashMap<String, State> servicePrompts;
     private List<State> registrationStates;
+    private Set<String> allChatIds;
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
         //allUsers = DatabaseManager.getAllUsers();
         allUsers = new HashMap<>();
+
         servicePrompts = new HashMap<>();
         servicePrompts.put("Имя", USER_NAME);
         servicePrompts.put("Возраст", USER_AGE);
@@ -150,16 +151,28 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
                 // User starts matching / USER WITH STATE OF BUTTON "Поиск"
                 else if (currentUser.getUserState() == USER_STATE_FINDING) {
-                    System.out.println(messageText);
+                    allChatIds = new HashSet<String>(allUsers.keySet());
                     if (messageText.compareTo("Назад") == 0) {
                         currentUser.setUserState(USER_STATE_MAIN_MENU);
                         MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
                     }
                     else if (messageText.compareTo("♥") == 0) {
-                        MessageBuilder.usualMessage(chatId, "ЛАЙКОСИК НЕРЯЛЬНЫЙ"); // MESSAGE
+                        currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
+                        currentUser.addFriend(currentUser.getLastViewedProfile());
+
+                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
+                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
                     }
                     else if (messageText.compareTo("\uD83D\uDC94") == 0) {
-                        MessageBuilder.usualMessage(chatId, "ДИЗРЕСПЕКТ НЕРЯЛЬНЫЙ"); // MESSAGE
+                        currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
+                        currentUser.deleteFriend(currentUser.getLastViewedProfile());//этот сценарий возможен лишь при повторном пробеге по всем пользователям
+
+                        //стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
+
+                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
+                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
                     }
                     else MessageBuilder.usualMessage(chatId, "something wrong", MAIN_MENU_KEYBOARD); // MESSAGE
                 }
@@ -180,8 +193,12 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                     }
                     // CHANGES STATE TO USER_STATE_FINDING
                     else if (messageText.compareTo("Поиск") == 0) {
+                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
+                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+
                         currentUser.setUserState(USER_STATE_FINDING);
-                        MessageBuilder.usualMessage(chatId, currentUser.getStr(), FINDING_KEYBOARD);
+                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
                     }
                     // UNKNOWN MESSAGE
                     else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
