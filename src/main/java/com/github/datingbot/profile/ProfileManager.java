@@ -1,9 +1,8 @@
 package com.github.datingbot.profile;
 
-import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.message.MessageBuilder;
 import com.github.datingbot.auxiliary.StringFunctions;
-import com.github.datingbot.database.DatabaseManager;
+//import com.github.datingbot.database.DatabaseManager;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import static com.github.datingbot.keyboard.Keyboard.*;
@@ -62,7 +61,7 @@ public class ProfileManager {
         profile.setInfo(message.getText());
         if (!flag) {
             profile.setUserState(USER_STATE_MAIN_MENU);
-            DatabaseManager.addUser(profile);
+            //DatabaseManager.addUser(profile);
             MessageBuilder.usualMessage(profile.getChatId(), "Анкета готова", MAIN_MENU_KEYBOARD);
         }
         else profile.setTempInfo(EMPTY);
@@ -80,13 +79,25 @@ public class ProfileManager {
         }
     }
 
+//    private static void sendProfile(Message message, Profile profile, SendMessage botReply){
+//        if (message.getText().compareTo("Назад") == 0) {
+//            botReply.setReplyMarkup(MAIN_MENU_KEYBOARD.getKeyboardMarkup());
+//        }
+//        else{
+//
+//            //botReply.setText("Выберите команду на клавиатуре");
+//        }
+//
+//    }
+
+
     public static void changeProfileGlobal(Profile profile) {
-        DatabaseManager.changeUser(profile);
+        //DatabaseManager.changeUser(profile);
     }
 
     public static void emptyState(Profile profile) {
         String textProfile = profile.getStr();
-        MessageBuilder.usualMessage(profile.getChatId(), textProfile, PROFILE_CHANGE);
+        MessageBuilder.usualMessage(profile.getChatId(), textProfile, PROFILE_CHANGE_KEYBOARD);
     }
 
     public static void useProfile(Profile profile, Message message) {
