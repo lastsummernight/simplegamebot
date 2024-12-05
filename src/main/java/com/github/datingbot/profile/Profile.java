@@ -3,9 +3,7 @@ package com.github.datingbot.profile;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Profile {
 
@@ -17,12 +15,15 @@ public class Profile {
     private State userState;
     private String chatId;
     private List<String> friends;
+    private Set<String> watchedProfiles;
+
     private State tempInfo = null;
 
     public Profile(String id, State state) {
         chatId = id;
         userState = state;
         friends = new ArrayList<>();
+        watchedProfiles = new HashSet<>();
     }
 
     public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends) {
@@ -115,5 +116,9 @@ public class Profile {
     public void setUserState(State userState) {
         this.userState = userState;
     }
+
+    public Set<String> getWatchedProfiles() { return watchedProfiles; }
+
+    public void setWatchedProfiles(Set<String> watchedProfiles) { this.watchedProfiles = watchedProfiles; }
 
 }
