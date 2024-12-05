@@ -13,6 +13,7 @@ public enum State {
     USER_PROFILE_CHANGE,
     USER_MESSAGES,
     USER_MESSAGES_CHOOSE,
+    USER_CHATING,
     EMPTY;
 
 }
