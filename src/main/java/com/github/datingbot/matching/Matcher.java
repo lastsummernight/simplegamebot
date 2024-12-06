@@ -21,10 +21,11 @@ public class Matcher {
             //Пока что будем делать это насильно
             System.out.println("empty");
             notRecomendedMatches.clear();
+            profile.deleteWatchedProfiles();
+            profile.deleteNotLovedBy();
         }
         allChatIds.removeAll(notRecomendedMatches);
         List<String> notUsedMatches = new ArrayList<String>(allChatIds);
-        profile.deleteWatchedProfiles();
         returningProfile = allUsers.get(notUsedMatches.getFirst());
         return returningProfile;
     }
