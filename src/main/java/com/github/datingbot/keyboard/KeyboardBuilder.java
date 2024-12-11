@@ -32,6 +32,7 @@ public class KeyboardBuilder {
 
             case USER_STATE_FINDING:
                 keyboardRow.add("♥");
+                keyboardRow.add("Назад");
                 keyboardRow.add("\uD83D\uDC94"); // разбитое сердечко
                 keyboard.add(keyboardRow);
                 break;

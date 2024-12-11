@@ -3,9 +3,7 @@ package com.github.datingbot.profile;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Profile {
 
@@ -17,12 +15,22 @@ public class Profile {
     private State userState;
     private String chatId;
     private List<String> friends;
+
+    private HashSet<String> watchedProfiles;
+
+    private HashSet<String> notLovedBy; //Пользователи которые отвергли этот профиль
+
+    private String lastViewedProfile;
+
     private State tempInfo = null;
 
     public Profile(String id, State state) {
         chatId = id;
         userState = state;
         friends = new ArrayList<>();
+        watchedProfiles = new HashSet<>();
+        watchedProfiles.add(chatId);
+        notLovedBy = new HashSet<>();
     }
 
     public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends) {
@@ -42,6 +50,23 @@ public class Profile {
             this.friends = new ArrayList<>();
     }
 
+    public Profile(List<String> t) {
+        chatId = t.get(0);
+        userState = State.USER_STATE_MAIN_MENU;
+        username = t.get(1);
+        this.age = Integer.parseInt(t.get(2));
+        this.city = t.get(3);
+        if (t.get(4).equals("1"))
+            this.gender = "Парень";
+        else
+            this.gender = "Девушка";
+        this.info = t.get(5);
+        if (t.get(6) != null || !t.get(6).equals("None"))
+            this.friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
+        else
+            this.friends = new ArrayList<>();
+    }
+
     public String getStrFriends() {
         if (friends.isEmpty())
             return "";
@@ -50,6 +75,18 @@ public class Profile {
 
     public List<String> getFriends() {
         return friends;
+    }
+
+    public void addFriend(String anothersUserChatId) {
+        if (!(friends.contains(anothersUserChatId))) {
+            friends.add(anothersUserChatId);
+        }
+    }
+
+    public void deleteFriend(String anothersUserChatId) {
+        if (friends.contains(anothersUserChatId)) {
+            friends.remove(anothersUserChatId);
+        }
     }
 
     public void setTempInfo(State temp) {
@@ -116,4 +153,44 @@ public class Profile {
         this.userState = userState;
     }
 
+    public HashSet<String> getWatchedProfiles() {
+        if (watchedProfiles == null) {
+            watchedProfiles = new HashSet<>();
+            watchedProfiles.add(chatId);
+        }
+        return watchedProfiles;
+    }
+
+    public void addWatchedProfile(String anothersUserChatId) {
+        watchedProfiles.add(anothersUserChatId);
+    }
+
+    public String getLastViewedProfile() {
+        return lastViewedProfile;
+    }
+
+    public void setLastViewedProfile(String lastViewedProfile) {
+        this.lastViewedProfile = lastViewedProfile;
+    }
+
+    public void deleteWatchedProfiles() {
+        watchedProfiles.clear();
+        watchedProfiles.add(chatId);
+    }
+
+    public HashSet<String> getNotLovedBy() {
+        if (notLovedBy == null) {
+            notLovedBy = new HashSet<>();
+            notLovedBy.add(chatId);
+        }
+        return notLovedBy;
+    }
+
+    public void addNotLovedBy(String anothersUserChatId) {
+        notLovedBy.add(anothersUserChatId);
+    }
+
+    public void deleteNotLovedBy() {
+        notLovedBy.clear();
+    }
 }
