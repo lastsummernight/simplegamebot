@@ -35,7 +35,7 @@ public class DatabaseManager {
         }
     }
 
-    public static void eCreateTable() {
+    public static void extraCreateTable() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS users ("
                 + "user_id INTEGER UNIQUE PRIMARY KEY, "
                 + "name TEXT, "
@@ -55,7 +55,7 @@ public class DatabaseManager {
         }
     }
 
-    public static void ePrintTable() {
+    public static void extraPrintTable() {
         String requestSQL = "SELECT * FROM users;";
 
         try {
@@ -72,12 +72,26 @@ public class DatabaseManager {
                 temp.add(resultSet.getString("gender"));
                 temp.add(resultSet.getString("info"));
                 temp.add(resultSet.getString("friends"));
+                temp.add(resultSet.getString("notfriends"));
                 Debugger.printProfile(new Profile(temp));
             }
 
             resultSet.close();
             preparedStatement.close();
             System.out.println("table has printed");
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void extraCreateColumn() {
+        String statement = "ALTER TABLE users ADD COLUMN notfriends TEXT";
+
+        try {
+            Statement preparedStatement = connection.createStatement();
+            preparedStatement.execute(statement);
+            System.out.println("notfriends column created");
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -101,9 +115,10 @@ public class DatabaseManager {
                 boolean userGender = resultSet.getBoolean("gender");
                 String userInfo = resultSet.getString("info");
                 String userFriends = resultSet.getString("friends");
+                String userNotFriends = resultSet.getString("notfriends");
                 System.out.println(userFriends);
 
-                Profile user = new Profile(userId, USER_STATE_MAIN_MENU, userName, userAge, userCity, userGender, userInfo, userFriends);
+                Profile user = new Profile(userId, USER_STATE_MAIN_MENU, userName, userAge, userCity, userGender, userInfo, userFriends, userNotFriends);
 
                 allUsers.put(userId, user);
             }
@@ -119,7 +134,7 @@ public class DatabaseManager {
     }
 
     public static void addUser(Profile profile) {
-        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends, notfriends) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -134,6 +149,7 @@ public class DatabaseManager {
                 preparedStatement.setString(5, "0");
             preparedStatement.setString(6, profile.getInfo());
             preparedStatement.setString(7, profile.getStrFriends());
+            preparedStatement.setString(8, profile.getStrNotFriends());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) inserted.");
@@ -144,7 +160,7 @@ public class DatabaseManager {
 
 
     public static void changeUser(Profile profile) {
-        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ? WHERE user_id = ?";
+        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ?, notfriends = ? WHERE user_id = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -157,8 +173,9 @@ public class DatabaseManager {
             else
                 preparedStatement.setString(4, "0");
             preparedStatement.setString(5, profile.getInfo());
-            preparedStatement.setString(6, profile.getChatId());
-            preparedStatement.setString(7, profile.getStrFriends());
+            preparedStatement.setString(6, profile.getStrFriends());
+            preparedStatement.setString(7, profile.getStrNotFriends());
+            preparedStatement.setString(8, profile.getChatId());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) updated.");

@@ -16,9 +16,9 @@ public class Profile {
     private String chatId;
     private List<String> friends;
 
-    private HashSet<String> watchedProfiles;
+    private Set<String> watchedProfiles;
 
-    private HashSet<String> notLovedBy; //Пользователи которые отвергли этот профиль
+    private List<String> notLovedBy; //Пользователи которые отвергли этот профиль
 
     private String lastViewedProfile;
 
@@ -30,10 +30,10 @@ public class Profile {
         friends = new ArrayList<>();
         watchedProfiles = new HashSet<>();
         watchedProfiles.add(chatId);
-        notLovedBy = new HashSet<>();
+        notLovedBy = new ArrayList<>();
     }
 
-    public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends) {
+    public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends, String notFriends) {
         chatId = id;
         userState = state;
         username = name;
@@ -44,10 +44,16 @@ public class Profile {
         else
             this.gender = "Девушка";
         this.info = info;
+
         if (friends != null)
             this.friends = new ArrayList<>(Arrays.asList(friends.split(",")));
         else
             this.friends = new ArrayList<>();
+
+        if (notFriends != null)
+            this.notLovedBy = new ArrayList<>(Arrays.asList(friends.split(",")));
+        else
+            this.notLovedBy = new ArrayList<>();
     }
 
     public Profile(List<String> t) {
@@ -61,10 +67,20 @@ public class Profile {
         else
             this.gender = "Девушка";
         this.info = t.get(5);
+
         if (t.get(6) != null || !t.get(6).equals("None"))
             this.friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
         else
             this.friends = new ArrayList<>();
+
+        if (t.get(7) != null) {
+            if (!t.get(7).equals("None"))
+                this.notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
+            else
+                this.notLovedBy = new ArrayList<>();
+        }
+        else
+            this.notLovedBy = new ArrayList<>();
     }
 
     public String getStrFriends() {
@@ -87,6 +103,12 @@ public class Profile {
         if (friends.contains(anothersUserChatId)) {
             friends.remove(anothersUserChatId);
         }
+    }
+
+    public String getStrNotFriends() {
+        if (notLovedBy.isEmpty())
+            return "";
+        return String.join(",", notLovedBy);
     }
 
     public void setTempInfo(State temp) {
@@ -153,7 +175,7 @@ public class Profile {
         this.userState = userState;
     }
 
-    public HashSet<String> getWatchedProfiles() {
+    public Set<String> getWatchedProfiles() {
         if (watchedProfiles == null) {
             watchedProfiles = new HashSet<>();
             watchedProfiles.add(chatId);
@@ -178,9 +200,9 @@ public class Profile {
         watchedProfiles.add(chatId);
     }
 
-    public HashSet<String> getNotLovedBy() {
+    public List<String> getNotLovedBy() {
         if (notLovedBy == null) {
-            notLovedBy = new HashSet<>();
+            notLovedBy = new ArrayList<>();
             notLovedBy.add(chatId);
         }
         return notLovedBy;

@@ -193,12 +193,12 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                     }
                     // CHANGES STATE TO USER_STATE_FINDING
                     else if (messageText.compareTo("Поиск") == 0) {
-                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
                         MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
-                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
                         System.out.println(currentUser.getLastViewedProfile());
 
                         currentUser.setUserState(USER_STATE_FINDING);
+                        currentUser.setLastViewedProfile(currentUser.getChatId());
                         MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
                     }
                     // UNKNOWN MESSAGE

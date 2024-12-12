@@ -17,7 +17,10 @@ public class ProfileManager {
             profile.setUserState(USER_AGE);
             MessageBuilder.usualMessage(profile.getChatId(), "Введи возраст (число):");
         }
-        else profile.setTempInfo(EMPTY);
+        else {
+            profile.setTempInfo(EMPTY);
+            DatabaseManager.changeUser(profile);
+        }
     }
 
     private static void supportAge(Message message, Profile profile, boolean flag) {
@@ -29,7 +32,10 @@ public class ProfileManager {
                     profile.setUserState(USER_CITY);
                     MessageBuilder.usualMessage(profile.getChatId(), "Введи свой город:");
                 }
-                else profile.setTempInfo(EMPTY);
+                else {
+                    profile.setTempInfo(EMPTY);
+                    DatabaseManager.changeUser(profile);
+                }
                 return;
             }
         }
@@ -42,7 +48,10 @@ public class ProfileManager {
             profile.setUserState(USER_GENDER);
             MessageBuilder.usualMessage(profile.getChatId(), "Введи пол:", GENDER_KEYBOARD);
         }
-        else profile.setTempInfo(EMPTY);
+        else {
+            profile.setTempInfo(EMPTY);
+            DatabaseManager.changeUser(profile);
+        }
     }
 
     private static void supportGender(Message message, Profile profile, boolean flag) {
@@ -52,7 +61,10 @@ public class ProfileManager {
                 profile.setUserState(USER_INFO);
                 MessageBuilder.usualMessage(profile.getChatId(), "Введи о себе:");
             }
-            else profile.setTempInfo(EMPTY);
+            else {
+                profile.setTempInfo(EMPTY);
+                DatabaseManager.changeUser(profile);
+            }
             return;
         }
         MessageBuilder.usualMessage(profile.getChatId(), "Неправильный ввод", GENDER_KEYBOARD);
@@ -65,7 +77,10 @@ public class ProfileManager {
             DatabaseManager.addUser(profile);
             MessageBuilder.usualMessage(profile.getChatId(), "Анкета готова", MAIN_MENU_KEYBOARD);
         }
-        else profile.setTempInfo(EMPTY);
+        else {
+            profile.setTempInfo(EMPTY);
+            DatabaseManager.changeUser(profile);
+        }
     }
 
     public static void changeProfileLocal(Message message, Profile profile) {
