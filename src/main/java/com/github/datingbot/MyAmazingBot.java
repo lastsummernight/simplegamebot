@@ -1,10 +1,10 @@
 package com.github.datingbot;
 
 import com.github.datingbot.auxiliary.Debugger;
-import com.github.datingbot.auxiliary.MyException;
+import com.github.datingbot.auxiliary.exceptions.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
-//import com.github.datingbot.database.DatabaseManager;
+import com.github.datingbot.database.DatabaseManager;
 import com.github.datingbot.matching.Matcher;
 import com.github.datingbot.message.MessageBuilder;
 import com.github.datingbot.profile.Profile;
@@ -31,8 +31,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private Set<String> allChatIds;
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
-        //allUsers = DatabaseManager.getAllUsers();
-        allUsers = new HashMap<>();
+        allUsers = DatabaseManager.getAllUsers();
 
         servicePrompts = new HashMap<>();
         servicePrompts.put("Имя", USER_NAME);
@@ -185,6 +184,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                         currentUser.setUserState(USER_PROFILE);
                         MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
                     }
+//                    messageText.compareTo()
                     // CHANGES STATE TO USER_MESSAGES
                     else if (messageText.compareTo("Сообщения") == 0) {
                         currentUser.setUserState(USER_MESSAGES);
@@ -193,11 +193,12 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                     }
                     // CHANGES STATE TO USER_STATE_FINDING
                     else if (messageText.compareTo("Поиск") == 0) {
-                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
                         MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
-                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+                        System.out.println(currentUser.getLastViewedProfile());
 
                         currentUser.setUserState(USER_STATE_FINDING);
+                        currentUser.setLastViewedProfile(currentUser.getChatId());
                         MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
                     }
                     // UNKNOWN MESSAGE

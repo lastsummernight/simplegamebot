@@ -1,16 +1,11 @@
 package com.github.datingbot.message;
 
-import com.github.datingbot.auxiliary.Debugger;
-import com.github.datingbot.auxiliary.MyException;
+import com.github.datingbot.auxiliary.exceptions.*;
 import com.github.datingbot.keyboard.Keyboard;
 import com.github.datingbot.profile.Profile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
-import java.security.Key;
 import java.util.HashMap;
-
-import static com.github.datingbot.auxiliary.CustomException.*;
 
 public class MessageBuilder {
 
@@ -44,10 +39,11 @@ public class MessageBuilder {
         // здеся логика сборки сообщения
         Message temp = null;
         if (mapOfMessages.containsKey(chatId)) temp = mapOfMessages.get(chatId);
-        else throw MBUILDERMAPCONTAINSKEY.getException();
+        else throw new InvalidMapKeyException();
+
         SendMessage returned = null;
         if (temp.isCorrect()) returned = temp.execute();
-        else throw MESSAGEISCORRECT.getException();
+        else throw new InvalidMessageException();
 
         return returned;
     }

@@ -1,5 +1,6 @@
 package com.github.datingbot.auxiliary;
 
+import com.github.datingbot.auxiliary.exceptions.MyException;
 import com.github.datingbot.profile.Profile;
 
 import java.io.PrintStream;
@@ -26,15 +27,11 @@ public class Debugger {
         printStream.println("   Gender = " + profile.getGender());
         printStream.println("   Info = " + profile.getInfo());
         printStream.println("   Friends = " + profile.getStrFriends());
+        printStream.println("   NotFriends = " + profile.getStrNotFriends());
         printStream.println("}");
     }
 
     public static void printException(MyException e) {
         printStream.println(e.returnTraceback());
     }
-
-    public static void printException(CustomException e) {
-        printStream.println(e.getTraceback());
-    }
-
 }

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 public class Matcher {
 
-
     public static Profile findAnotherPerson(Profile profile, HashMap<String, Profile> allUsers){
         Profile returningProfile;
         Set<String> allChatIds = allUsers.keySet().stream().collect(Collectors.toSet());
@@ -21,17 +20,24 @@ public class Matcher {
             //Пока что будем делать это насильно
             System.out.println("empty");
             notRecomendedMatches.clear();
+            profile.deleteWatchedProfiles();
+            profile.deleteNotLovedBy();
         }
         allChatIds.removeAll(notRecomendedMatches);
         List<String> notUsedMatches = new ArrayList<String>(allChatIds);
-        profile.deleteWatchedProfiles();
-        returningProfile = allUsers.get(notUsedMatches.getFirst());
-        return returningProfile;
+        for (String chatId : notUsedMatches) {
+            Profile tempProfile = allUsers.get(chatId);
+            if (ValueFunction(profile, tempProfile) > 0)
+                return allUsers.get(chatId);
+            else
+                profile.addWatchedProfile(tempProfile.getChatId());
+        }
+        return findAnotherPerson(profile, allUsers);
     }
 
-    public static Integer ValueFunction(Profile seeker, Profile target){
-        //Оценивает профиль исходя из предпочтений пользователя
-        //Сейчас не важно
+    public static int ValueFunction(Profile seeker, Profile target){
+        if (seeker.getGender().equals(target.getGender()))
+            return 0;
         return 1;
     }
 }
