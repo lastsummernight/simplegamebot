@@ -45,6 +45,158 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         MessageBuilder.setUp(allUsers);
     }
 
+    private void newUserFunction(String chatId, String messageText) {
+        System.out.println("begin of register");
+        allUsers.put(chatId, new Profile(chatId, USER_NAME));
+        MessageBuilder.usualMessage(chatId, "Давай заполним Твою анкету\nВведи имя:"); // MESSAGE
+    }
+
+    private void viewProfileFunction(String chatId, String messageText) {
+        System.out.println("in anketa");
+        Profile currentUser = allUsers.get(chatId);
+        if (messageText.compareTo("Назад") == 0) {
+            System.out.println("from anketa to main menu");
+            currentUser.setUserState(USER_STATE_MAIN_MENU);
+            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+        }
+        else if (messageText.compareTo("Изменить профиль") == 0) {
+            System.out.println("change anketa");
+            currentUser.setUserState(USER_PROFILE_CHANGE);
+            currentUser.setTempInfo(EMPTY);
+            //ProfileManager.useProfile(currentUser, userMessage); // MESSAGE ???
+            MessageBuilder.usualMessage(chatId, "Выбери, что хочешь изменить", PROFILE_CHANGE_KEYBOARD);
+        }
+        else {
+            MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_PROFILE_KEYBOARD);
+            System.out.println("bad input");
+        } // MESSAGE
+    }
+
+    private void changeProfileFunction(String chatId, Message userMessage) {
+        // служебные | контекстная
+        Profile currentUser = allUsers.get(chatId);
+        String messageText = userMessage.getText();
+        if (messageText.compareTo("Назад") == 0) {
+            System.out.println("from changing anketa to main menu");
+            currentUser.setTempInfo(EMPTY);
+            currentUser.setUserState(USER_PROFILE);
+            MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
+        }
+        else {
+            if (servicePrompts.containsKey(messageText)) {
+                System.out.println("success changing anketa");
+                currentUser.setTempInfo(servicePrompts.get(messageText));
+                if (messageText.compareTo("Пол") == 0)
+                    MessageBuilder.usualMessage(chatId, "Выбери пол :", GENDER_KEYBOARD); // MESSAGE
+                else MessageBuilder.usualMessage(chatId, "Введи " + messageText.toLowerCase() + ':'); // MESSAGE
+            }
+            else {
+                System.out.println("default");
+                ProfileManager.useProfile(allUsers.get(chatId), userMessage); // MESSAGE ???
+                if (currentUser.getTempInfo() == EMPTY)
+                    ProfileManager.emptyState(currentUser); // MESSAGE BY DEFAULT ???
+            }
+        }
+    }
+
+    private void registrationFunction(String chatId, Message userMessage) {
+        System.out.println("register+");
+        Profile currentUser = allUsers.get(chatId);
+        ProfileManager.changeProfileLocal(userMessage, currentUser); // REGISTRATION WITH MESSAGES
+    }
+
+    private void messageChooseFunction(String chatId, String messageText) {
+        Profile currentUser = allUsers.get(chatId);
+        int num = StringFunctions.isNum(messageText);
+        if (messageText.compareTo("Назад") == 0) {
+            currentUser.setUserState(USER_STATE_MAIN_MENU);
+            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+        }
+        else if (num != -1) {
+            if (num > 0 && num <= currentUser.getFriends().size()) {
+                MessageBuilder.usualMessage(chatId, "Вы выбрали пользователя "
+                        + currentUser.getFriends().get(num - 1), BACK_KEYBOARD); // MESSAGE
+                // EXTRA LOGIC
+            }
+            else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
+        }
+        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
+    }
+
+
+    private void viewChatFunction(String chatId, String messageText) {
+        Profile currentUser = allUsers.get(chatId);
+        if (messageText.compareTo("Назад") == 0) {
+            currentUser.setUserState(USER_STATE_MAIN_MENU);
+            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+        }
+        else if (messageText.compareTo("Выбрать диалог") == 0) {
+            currentUser.setUserState(USER_MESSAGES_CHOOSE);
+            MessageBuilder.usualMessage(chatId, "Введи порядковый номер диалога", BACK_KEYBOARD); // MESSAGE
+        }
+        else if (false) {
+            //add extra logic for viewing chat by id
+        }
+        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_MESSAGES_KEYBOARD); // MESSAGE
+    }
+
+    private void findingFunction(String chatId, String messageText) {
+        allChatIds = new HashSet<String>(allUsers.keySet());
+        Profile currentUser = allUsers.get(chatId);
+        if (messageText.compareTo("Назад") == 0) {
+            currentUser.setUserState(USER_STATE_MAIN_MENU);
+            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+        }
+        else if (messageText.compareTo("♥") == 0) {
+            currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
+            currentUser.addFriend(currentUser.getLastViewedProfile());
+
+            Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
+            currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+        }
+        else if (messageText.compareTo("\uD83D\uDC94") == 0) {
+            currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
+            currentUser.deleteFriend(currentUser.getLastViewedProfile());//этот сценарий возможен лишь при повторном пробеге по всем пользователям
+
+            //стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
+
+            Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
+            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
+            currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+        }
+        else MessageBuilder.usualMessage(chatId, "something wrong", MAIN_MENU_KEYBOARD); // MESSAGE
+    }
+
+    private void mainMenuFunction(String chatId, String messageText) {
+        // CHANGES STATE TO USER_PROFILE + EXTRA INFO
+        Profile currentUser = allUsers.get(chatId);
+        if (messageText.compareTo("Моя анкета") == 0) {
+            currentUser.setUserState(USER_PROFILE);
+            MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
+        }
+//                    messageText.compareTo()
+        // CHANGES STATE TO USER_MESSAGES
+        else if (messageText.compareTo("Сообщения") == 0) {
+            currentUser.setUserState(USER_MESSAGES);
+            MessageBuilder.usualMessage(chatId, "Ваши сообщения:\n"
+                    + StringFunctions.formatFriends(currentUser.getFriends()), VIEW_MESSAGES_KEYBOARD); // MESSAGE
+        }
+        // CHANGES STATE TO USER_STATE_FINDING
+        else if (messageText.compareTo("Поиск") == 0) {
+            Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
+            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
+            System.out.println(currentUser.getLastViewedProfile());
+
+            currentUser.setUserState(USER_STATE_FINDING);
+            currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
+        }
+        // UNKNOWN MESSAGE
+        else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+        printProfile(currentUser);
+    }
+
     @Override
     public void consume(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -56,154 +208,24 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
             // FOR NEW USERS
             if (currentUser == null) {
-                System.out.println("begin of register");
-                allUsers.put(chatId, new Profile(chatId, USER_NAME));
-                MessageBuilder.usualMessage(chatId, "Давай заполним Твою анкету\nВведи имя:"); // MESSAGE
+                newUserFunction(chatId, messageText);
             }
 
             else {
                 // USER WITH STATE REGISTRATION
                 System.out.println("userState:" + currentUser.getUserState());
                 if (registrationStates.contains(currentUser.getUserState())) {
-                    System.out.println("register+");
-                    ProfileManager.changeProfileLocal(userMessage, currentUser); // REGISTRATION WITH MESSAGES
+                    registrationFunction(chatId, userMessage);
                 }
-
-                // USER WITH STATE OF BUTTON "МОЯ АНКЕТА"
-                else if (currentUser.getUserState() == USER_PROFILE) {
-                    System.out.println("in anketa");
-                    if (messageText.compareTo("Назад") == 0) {
-                        System.out.println("from anketa to main menu");
-                        currentUser.setUserState(USER_STATE_MAIN_MENU);
-                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-                    }
-                    else if (messageText.compareTo("Изменить профиль") == 0) {
-                        System.out.println("change anketa");
-                        currentUser.setUserState(USER_PROFILE_CHANGE);
-                        currentUser.setTempInfo(EMPTY);
-                        //ProfileManager.useProfile(currentUser, userMessage); // MESSAGE ???
-                        MessageBuilder.usualMessage(chatId, "Выбери, что хочешь изменить", PROFILE_CHANGE_KEYBOARD);
-                    }
-                    else {
-                        MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_PROFILE_KEYBOARD);
-                        System.out.println("bad input");
-                    } // MESSAGE
-                }
-
-                else if (currentUser.getUserState() == USER_PROFILE_CHANGE) {
-                    // служебные | контекстная
-                    if (messageText.compareTo("Назад") == 0) {
-                        System.out.println("from changing anketa to main menu");
-                        currentUser.setTempInfo(EMPTY);
-                        currentUser.setUserState(USER_PROFILE);
-                        MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
-                    }
-                    else {
-                        if (servicePrompts.containsKey(messageText)) {
-                            System.out.println("success changing anketa");
-                            currentUser.setTempInfo(servicePrompts.get(messageText));
-                            if (messageText.compareTo("Пол") == 0)
-                                MessageBuilder.usualMessage(chatId, "Выбери пол :", GENDER_KEYBOARD); // MESSAGE
-                            else MessageBuilder.usualMessage(chatId, "Введи " + messageText.toLowerCase() + ':'); // MESSAGE
-                        }
-                        else {
-                            System.out.println("default");
-                            ProfileManager.useProfile(allUsers.get(chatId), userMessage); // MESSAGE ???
-                            if (currentUser.getTempInfo() == EMPTY)
-                                ProfileManager.emptyState(currentUser); // MESSAGE BY DEFAULT ???
-                        }
-                    }
-                }
-
-                else if (currentUser.getUserState() == USER_MESSAGES_CHOOSE) {
-                    int num = StringFunctions.isNum(messageText);
-                    if (messageText.compareTo("Назад") == 0) {
-                        currentUser.setUserState(USER_STATE_MAIN_MENU);
-                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-                    }
-                    else if (num != -1) {
-                        if (num > 0 && num <= currentUser.getFriends().size()) {
-                            MessageBuilder.usualMessage(chatId, "Вы выбрали пользователя "
-                                    + currentUser.getFriends().get(num - 1), BACK_KEYBOARD); // MESSAGE
-                            // EXTRA LOGIC
-                        }
-                        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
-                    }
-                    else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
-                }
-
-                // USER WITH STATE OF BUTTON "ДИАЛОГИ"
-                else if (currentUser.getUserState() == USER_MESSAGES) {
-                    if (messageText.compareTo("Назад") == 0) {
-                        currentUser.setUserState(USER_STATE_MAIN_MENU);
-                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-                    }
-                    else if (messageText.compareTo("Выбрать диалог") == 0) {
-                        currentUser.setUserState(USER_MESSAGES_CHOOSE);
-                        MessageBuilder.usualMessage(chatId, "Введи порядковый номер диалога", BACK_KEYBOARD); // MESSAGE
-                    }
-                    else if (false) {
-                        //add extra logic for viewing chat by id
-                    }
-                    else MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_MESSAGES_KEYBOARD); // MESSAGE
-                }
-
-                // User starts matching / USER WITH STATE OF BUTTON "Поиск"
-                else if (currentUser.getUserState() == USER_STATE_FINDING) {
-                    allChatIds = new HashSet<String>(allUsers.keySet());
-                    if (messageText.compareTo("Назад") == 0) {
-                        currentUser.setUserState(USER_STATE_MAIN_MENU);
-                        MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-                    }
-                    else if (messageText.compareTo("♥") == 0) {
-                        currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
-                        currentUser.addFriend(currentUser.getLastViewedProfile());
-
-                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
-                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
-                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
-                    }
-                    else if (messageText.compareTo("\uD83D\uDC94") == 0) {
-                        currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
-                        currentUser.deleteFriend(currentUser.getLastViewedProfile());//этот сценарий возможен лишь при повторном пробеге по всем пользователям
-
-                        //стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
-
-                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
-                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
-                        currentUser.setLastViewedProfile(FoundedMatch.getChatId());
-                    }
-                    else MessageBuilder.usualMessage(chatId, "something wrong", MAIN_MENU_KEYBOARD); // MESSAGE
-                }
-
-
-                // IN OTHER STATES
                 else {
-                    // CHANGES STATE TO USER_PROFILE + EXTRA INFO
-                    if (messageText.compareTo("Моя анкета") == 0) {
-                        currentUser.setUserState(USER_PROFILE);
-                        MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
+                    switch (currentUser.getUserState()) {
+                        case USER_PROFILE -> viewProfileFunction(chatId,messageText);
+                        case USER_PROFILE_CHANGE -> changeProfileFunction(chatId,userMessage);
+                        case USER_MESSAGES_CHOOSE -> messageChooseFunction(chatId,messageText);
+                        case USER_MESSAGES ->  viewChatFunction(chatId,messageText);
+                        case USER_STATE_FINDING -> findingFunction(chatId,messageText);
+                        default -> mainMenuFunction(chatId,messageText);
                     }
-//                    messageText.compareTo()
-                    // CHANGES STATE TO USER_MESSAGES
-                    else if (messageText.compareTo("Сообщения") == 0) {
-                        currentUser.setUserState(USER_MESSAGES);
-                        MessageBuilder.usualMessage(chatId, "Ваши сообщения:\n"
-                                + StringFunctions.formatFriends(currentUser.getFriends()), VIEW_MESSAGES_KEYBOARD); // MESSAGE
-                    }
-                    // CHANGES STATE TO USER_STATE_FINDING
-                    else if (messageText.compareTo("Поиск") == 0) {
-                        Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
-                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
-                        System.out.println(currentUser.getLastViewedProfile());
-
-                        currentUser.setUserState(USER_STATE_FINDING);
-                        currentUser.setLastViewedProfile(currentUser.getChatId());
-                        MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
-                    }
-                    // UNKNOWN MESSAGE
-                    else MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-                    printProfile(currentUser);
                 }
             }
 
