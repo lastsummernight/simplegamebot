@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class DatabaseManager {
 
 //    public static void main(String[] args) {
 //        connectDB();
-//        eCreateTable();
+//        extraCreateTable();
 //        addUser(new Profile("123123", USER_STATE_MAIN_MENU, "Motya", 20, "Msk", true, "О себе", "123"));
 //        ePrintTable();
 //        closeConnectDB();
@@ -73,6 +74,7 @@ public class DatabaseManager {
                 temp.add(resultSet.getString("info"));
                 temp.add(resultSet.getString("friends"));
                 temp.add(resultSet.getString("notfriends"));
+                temp.add(resultSet.getString("hobbies"));
                 Debugger.printProfile(new Profile(temp));
             }
 
@@ -85,13 +87,13 @@ public class DatabaseManager {
         }
     }
 
-    public static void extraCreateColumn() {
-        String statement = "ALTER TABLE users ADD COLUMN notfriends TEXT";
+    public static void extraCreateAttr() {
+        String statement = "ALTER TABLE users ADD COLUMN hobbies TEXT";
 
         try {
             Statement preparedStatement = connection.createStatement();
             preparedStatement.execute(statement);
-            System.out.println("notfriends column created");
+            System.out.println("attr column created");
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -110,15 +112,17 @@ public class DatabaseManager {
 
                 String userId = Integer.toString(resultSet.getInt("user_id"));
                 String userName = resultSet.getString("name");
-                int userAge = resultSet.getInt("age");
+                String userAge = resultSet.getString("age");
                 String userCity = resultSet.getString("city");
-                boolean userGender = resultSet.getBoolean("gender");
+                String userGender = resultSet.getString("gender");
                 String userInfo = resultSet.getString("info");
                 String userFriends = resultSet.getString("friends");
                 String userNotFriends = resultSet.getString("notfriends");
+                String userHobbies = resultSet.getString("hobbies");
                 System.out.println(userFriends);
 
-                Profile user = new Profile(userId, USER_STATE_MAIN_MENU, userName, userAge, userCity, userGender, userInfo, userFriends, userNotFriends);
+                Profile user = new Profile(Arrays.asList(userId, userName, userAge, userCity,
+                        userGender, userInfo, userFriends, userNotFriends, userHobbies));
 
                 allUsers.put(userId, user);
             }
@@ -134,7 +138,7 @@ public class DatabaseManager {
     }
 
     public static void addUser(Profile profile) {
-        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends, notfriends) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends, notfriends, hobbies) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -150,6 +154,7 @@ public class DatabaseManager {
             preparedStatement.setString(6, profile.getInfo());
             preparedStatement.setString(7, profile.getStrFriends());
             preparedStatement.setString(8, profile.getStrNotFriends());
+            preparedStatement.setString(9, profile.getStrUserHobbies());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) inserted.");
@@ -160,7 +165,7 @@ public class DatabaseManager {
 
 
     public static void changeUser(Profile profile) {
-        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ?, notfriends = ? WHERE user_id = ?";
+        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ?, notfriends = ?, hobbies = ? WHERE user_id = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -175,7 +180,8 @@ public class DatabaseManager {
             preparedStatement.setString(5, profile.getInfo());
             preparedStatement.setString(6, profile.getStrFriends());
             preparedStatement.setString(7, profile.getStrNotFriends());
-            preparedStatement.setString(8, profile.getChatId());
+            preparedStatement.setString(8, profile.getStrUserHobbies());
+            preparedStatement.setString(9, profile.getChatId());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) updated.");
