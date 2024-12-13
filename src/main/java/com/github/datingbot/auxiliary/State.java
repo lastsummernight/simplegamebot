@@ -2,18 +2,27 @@ package com.github.datingbot.auxiliary;
 
 public enum State {
 
-    USER_NAME,
-    USER_AGE,
-    USER_CITY,
-    USER_GENDER,
-    USER_INFO,
-    USER_STATE_MAIN_MENU,
+    USER_NAME("Имя"),
+    USER_AGE("Возраст"),
+    USER_CITY("Город"),
+    USER_GENDER("Пол"),
+    USER_INFO("О себе"),
+    USER_STATE_MAIN_MENU("Назад"),
     USER_STATE_FINDING,
     USER_PROFILE,
     USER_PROFILE_CHANGE,
-    USER_MESSAGES,
-    USER_MESSAGES_CHOOSE,
-    USER_CHATING,
+    USER_PROFILE_HOBBIES,
     EMPTY;
 
+    private String title;
+
+    private State() {}
+
+    private State(String name) {
+        title = name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
 }
