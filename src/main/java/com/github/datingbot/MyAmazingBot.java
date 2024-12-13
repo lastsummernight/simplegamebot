@@ -1,6 +1,7 @@
 package com.github.datingbot;
 
 import com.github.datingbot.auxiliary.Debugger;
+import com.github.datingbot.auxiliary.Hobbies;
 import com.github.datingbot.auxiliary.exceptions.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
@@ -20,29 +21,43 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.util.*;
 
 import static com.github.datingbot.auxiliary.Debugger.printProfile;
+import static com.github.datingbot.auxiliary.Hobbies.*;
 import static com.github.datingbot.auxiliary.State.*;
 import static com.github.datingbot.keyboard.Keyboard.*;
 
 public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
+    private static final String BROKEN_HEART ="\uD83D\uDC94" ;
     private TelegramClient telegramClient;
     public HashMap<String, Profile> allUsers;
     private HashMap<String, State> servicePrompts;
+    private HashMap<String, Hobbies> allHobbies;
     private List<State> registrationStates;
     private Set<String> allChatIds;
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
         allUsers = DatabaseManager.getAllUsers();
 
-        servicePrompts = new HashMap<>();
-        servicePrompts.put("Имя", USER_NAME);
-        servicePrompts.put("Возраст", USER_AGE);
-        servicePrompts.put("Город", USER_CITY);
-        servicePrompts.put("Пол", USER_GENDER);
-        servicePrompts.put("О себе", USER_INFO);
-        servicePrompts.put("Назад", USER_STATE_MAIN_MENU);
+        servicePrompts = buildMapStates(Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO, USER_STATE_MAIN_MENU));
         registrationStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
+        allHobbies = buildMapHobbies(Arrays.asList(LITERATURE_HOBBY, DANCE_HOBBY, VIDEOGAMES_HOBBY, SCIENCE_HOBBY, SPORT_HOBBY, MUSIC_HOBBY, COOKING_HOBBY, TRAVELLING_HOBBY, ART_HOBBY));
         Debugger.setUp();
         MessageBuilder.setUp(allUsers);
+    }
+
+    private HashMap<String, State> buildMapStates(List<State> enums) {
+        HashMap<String, State> result = new HashMap<>();
+        for (State temp : enums) {
+            result.put(temp.getTitle(), temp);
+        }
+        return result;
+    }
+
+    private HashMap<String, Hobbies> buildMapHobbies(List<Hobbies> enums) {
+        HashMap<String, Hobbies> result = new HashMap<>();
+        for (Hobbies temp : enums) {
+            result.put(temp.getTitle(), temp);
+        }
+        return result;
     }
 
     private void newUserFunction(String chatId, String messageText) {
@@ -54,30 +69,38 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private void viewProfileFunction(String chatId, String messageText) {
         System.out.println("in anketa");
         Profile currentUser = allUsers.get(chatId);
-        if (messageText.compareTo("Назад") == 0) {
+        if (messageText.equals("Назад")) {
             System.out.println("from anketa to main menu");
             currentUser.setUserState(USER_STATE_MAIN_MENU);
             MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
         }
-        else if (messageText.compareTo("Изменить профиль") == 0) {
+
+        else if (messageText.equals("Изменить профиль")) {
             System.out.println("change anketa");
             currentUser.setUserState(USER_PROFILE_CHANGE);
             currentUser.setTempInfo(EMPTY);
             //ProfileManager.useProfile(currentUser, userMessage); // MESSAGE ???
             MessageBuilder.usualMessage(chatId, "Выбери, что хочешь изменить", PROFILE_CHANGE_KEYBOARD);
         }
+
+        else if (messageText.equals("Изменить интересы")) {
+            System.out.println("change hobbies");
+            currentUser.setUserState(USER_PROFILE_HOBBIES);
+            MessageBuilder.usualMessage(chatId, currentUser.getStrHobbies() + "\nВыбери, что хочешь добавить или убрать", HOBBY_KEYBOARD);
+        }
+
         else {
             MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_PROFILE_KEYBOARD);
             System.out.println("bad input");
-        } // MESSAGE
+        }
     }
 
     private void changeProfileFunction(String chatId, Message userMessage) {
         // служебные | контекстная
         Profile currentUser = allUsers.get(chatId);
         String messageText = userMessage.getText();
-        if (messageText.compareTo("Назад") == 0) {
-            System.out.println("from changing anketa to main menu");
+        if (messageText.equals("Назад")) {
+            System.out.println("from changing anketa to view profile");
             currentUser.setTempInfo(EMPTY);
             currentUser.setUserState(USER_PROFILE);
             MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
@@ -86,7 +109,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             if (servicePrompts.containsKey(messageText)) {
                 System.out.println("success changing anketa");
                 currentUser.setTempInfo(servicePrompts.get(messageText));
-                if (messageText.compareTo("Пол") == 0)
+                if (messageText.equals("Пол"))
                     MessageBuilder.usualMessage(chatId, "Выбери пол :", GENDER_KEYBOARD); // MESSAGE
                 else MessageBuilder.usualMessage(chatId, "Введи " + messageText.toLowerCase() + ':'); // MESSAGE
             }
@@ -99,55 +122,85 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
+    private void changeHobbiesFunction(String chatId, Message userMessage) {
+        // служебные | контекстная
+        Profile currentUser = allUsers.get(chatId);
+        String messageText = userMessage.getText();
+        if (messageText.equals("Назад")) {
+            System.out.println("from changing hobby to view profile");
+            currentUser.setUserState(USER_PROFILE);
+            MessageBuilder.usualMessage(chatId, currentUser.getStrHobbies(), VIEW_PROFILE_KEYBOARD);
+            DatabaseManager.changeUser(currentUser);
+        }
+        else {
+            Hobbies temp = allHobbies.get(messageText);
+            if (temp != null) {
+                System.out.println("success changing hobbie");
+                if (currentUser.getUserHobbies().contains(temp)) {
+                    currentUser.deleteHobby(temp);
+                    MessageBuilder.usualMessage(chatId, messageText + " было удалено", HOBBY_KEYBOARD); // MESSAGE
+                }
+                else {
+                    currentUser.addHobby(temp);
+                    MessageBuilder.usualMessage(chatId, messageText + " было добавлено", HOBBY_KEYBOARD); // MESSAGE
+                }
+            }
+            else {
+                System.out.println("default");
+                MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", HOBBY_KEYBOARD); // MESSAGE
+            }
+        }
+    }
+
     private void registrationFunction(String chatId, Message userMessage) {
         System.out.println("register+");
         Profile currentUser = allUsers.get(chatId);
         ProfileManager.changeProfileLocal(userMessage, currentUser); // REGISTRATION WITH MESSAGES
     }
 
-    private void messageChooseFunction(String chatId, String messageText) {
-        Profile currentUser = allUsers.get(chatId);
-        int num = StringFunctions.isNum(messageText);
-        if (messageText.compareTo("Назад") == 0) {
-            currentUser.setUserState(USER_STATE_MAIN_MENU);
-            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-        }
-        else if (num != -1) {
-            if (num > 0 && num <= currentUser.getFriends().size()) {
-                MessageBuilder.usualMessage(chatId, "Вы выбрали пользователя "
-                        + currentUser.getFriends().get(num - 1), BACK_KEYBOARD); // MESSAGE
-                // EXTRA LOGIC
-            }
-            else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
-        }
-        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
-    }
-
-
-    private void viewChatFunction(String chatId, String messageText) {
-        Profile currentUser = allUsers.get(chatId);
-        if (messageText.compareTo("Назад") == 0) {
-            currentUser.setUserState(USER_STATE_MAIN_MENU);
-            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
-        }
-        else if (messageText.compareTo("Выбрать диалог") == 0) {
-            currentUser.setUserState(USER_MESSAGES_CHOOSE);
-            MessageBuilder.usualMessage(chatId, "Введи порядковый номер диалога", BACK_KEYBOARD); // MESSAGE
-        }
-        else if (false) {
-            //add extra logic for viewing chat by id
-        }
-        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_MESSAGES_KEYBOARD); // MESSAGE
-    }
+//    private void messageChooseFunction(String chatId, String messageText) {
+//        Profile currentUser = allUsers.get(chatId);
+//        int num = StringFunctions.isNum(messageText);
+//        if (messageText.equals("Назад")) {
+//            currentUser.setUserState(USER_STATE_MAIN_MENU);
+//            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+//        }
+//        else if (num != -1) {
+//            if (num > 0 && num <= currentUser.getFriends().size()) {
+//                MessageBuilder.usualMessage(chatId, "Вы выбрали пользователя "
+//                        + currentUser.getFriends().get(num - 1), BACK_KEYBOARD); // MESSAGE
+//                // EXTRA LOGIC
+//            }
+//            else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
+//        }
+//        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", BACK_KEYBOARD); // MESSAGE
+//    }
+//
+//
+//    private void viewChatFunction(String chatId, String messageText) {
+//        Profile currentUser = allUsers.get(chatId);
+//        if (messageText.equals("Назад")) {
+//            currentUser.setUserState(USER_STATE_MAIN_MENU);
+//            MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
+//        }
+//        else if (messageText.equals("Выбрать диалог")) {
+//            currentUser.setUserState(USER_MESSAGES_CHOOSE);
+//            MessageBuilder.usualMessage(chatId, "Введи порядковый номер диалога", BACK_KEYBOARD); // MESSAGE
+//        }
+//        else if (false) {
+//            //add extra logic for viewing chat by id
+//        }
+//        else MessageBuilder.usualMessage(chatId, "Неправильный ввод", VIEW_MESSAGES_KEYBOARD); // MESSAGE
+//    }
 
     private void findingFunction(String chatId, String messageText) {
         allChatIds = new HashSet<String>(allUsers.keySet());
         Profile currentUser = allUsers.get(chatId);
-        if (messageText.compareTo("Назад") == 0) {
+        if (messageText.equals("Назад")) {
             currentUser.setUserState(USER_STATE_MAIN_MENU);
             MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD); // MESSAGE
         }
-        else if (messageText.compareTo("♥") == 0) {
+        else if (messageText.equals("♥")) {
             currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
             currentUser.addFriend(currentUser.getLastViewedProfile());
 
@@ -155,11 +208,11 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
             currentUser.setLastViewedProfile(FoundedMatch.getChatId());
         }
-        else if (messageText.compareTo("\uD83D\uDC94") == 0) {
+        else if (messageText.equals(BROKEN_HEART)) {
             currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
             currentUser.deleteFriend(currentUser.getLastViewedProfile());//этот сценарий возможен лишь при повторном пробеге по всем пользователям
-
-            //стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
+            allUsers.get(currentUser.getLastViewedProfile()).addNotLovedBy(chatId);
+            //TODO: стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
 
             Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
             MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
@@ -171,19 +224,19 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private void mainMenuFunction(String chatId, String messageText) {
         // CHANGES STATE TO USER_PROFILE + EXTRA INFO
         Profile currentUser = allUsers.get(chatId);
-        if (messageText.compareTo("Моя анкета") == 0) {
+        if (messageText.equals("Моя анкета")) {
             currentUser.setUserState(USER_PROFILE);
             MessageBuilder.usualMessage(chatId, currentUser.getStr(), VIEW_PROFILE_KEYBOARD);
         }
-//                    messageText.compareTo()
-        // CHANGES STATE TO USER_MESSAGES
-        else if (messageText.compareTo("Сообщения") == 0) {
-            currentUser.setUserState(USER_MESSAGES);
-            MessageBuilder.usualMessage(chatId, "Ваши сообщения:\n"
-                    + StringFunctions.formatFriends(currentUser.getFriends()), VIEW_MESSAGES_KEYBOARD); // MESSAGE
-        }
+
+        // ЭТО ВСЕ ГАВНО НАДО ПЕРЕДЕЛАТЬ
+//        else if (messageText.equals("Понравившиеся")) {
+//            currentUser.setUserState(USER_MESSAGES);
+//            MessageBuilder.usualMessage(chatId, "Ваши сообщения:\n"
+//                    + StringFunctions.formatFriends(currentUser.getFriends()), VIEW_MESSAGES_KEYBOARD); // MESSAGE
+//        }
         // CHANGES STATE TO USER_STATE_FINDING
-        else if (messageText.compareTo("Поиск") == 0) {
+        else if (messageText.equals("Поиск")) {
             Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
             MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());// MESSAGE
             System.out.println(currentUser.getLastViewedProfile());
@@ -221,8 +274,9 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                     switch (currentUser.getUserState()) {
                         case USER_PROFILE -> viewProfileFunction(chatId,messageText);
                         case USER_PROFILE_CHANGE -> changeProfileFunction(chatId,userMessage);
-                        case USER_MESSAGES_CHOOSE -> messageChooseFunction(chatId,messageText);
-                        case USER_MESSAGES ->  viewChatFunction(chatId,messageText);
+                        case USER_PROFILE_HOBBIES -> changeHobbiesFunction(chatId,userMessage);
+//                        case USER_MESSAGES_CHOOSE -> messageChooseFunction(chatId,messageText);
+//                        case USER_MESSAGES ->  viewChatFunction(chatId,messageText);
                         case USER_STATE_FINDING -> findingFunction(chatId,messageText);
                         default -> mainMenuFunction(chatId,messageText);
                     }

@@ -1,5 +1,6 @@
 package com.github.datingbot.profile;
 
+import com.github.datingbot.auxiliary.Hobbies;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
 
@@ -7,21 +8,19 @@ import java.util.*;
 
 public class Profile {
 
+    private State userState;
+    private String chatId;
     private String username;
     private int age;
     private String gender;
     private String city;
     private String info;
-    private State userState;
-    private String chatId;
+
+    private List<Hobbies> userHobbies;
     private List<String> friends;
-
+    private List<String> notLovedBy; // Пользователи которые отвергли этот профиль
     private Set<String> watchedProfiles;
-
-    private List<String> notLovedBy; //Пользователи которые отвергли этот профиль
-
     private String lastViewedProfile;
-
     private State tempInfo = null;
 
     public Profile(String id, State state) {
@@ -31,29 +30,7 @@ public class Profile {
         watchedProfiles = new HashSet<>();
         watchedProfiles.add(chatId);
         notLovedBy = new ArrayList<>();
-    }
-
-    public Profile(String id, State state, String name, int age, String city, boolean gender, String info, String friends, String notFriends) {
-        chatId = id;
-        userState = state;
-        username = name;
-        this.age = age;
-        this.city = city;
-        if (gender)
-            this.gender = "Парень";
-        else
-            this.gender = "Девушка";
-        this.info = info;
-
-        if (friends != null)
-            this.friends = new ArrayList<>(Arrays.asList(friends.split(",")));
-        else
-            this.friends = new ArrayList<>();
-
-        if (notFriends != null)
-            this.notLovedBy = new ArrayList<>(Arrays.asList(friends.split(",")));
-        else
-            this.notLovedBy = new ArrayList<>();
+        userHobbies = new ArrayList<>();
     }
 
     public Profile(List<String> t) {
@@ -62,25 +39,83 @@ public class Profile {
         username = t.get(1);
         this.age = Integer.parseInt(t.get(2));
         this.city = t.get(3);
+
         if (t.get(4).equals("1"))
             this.gender = "Парень";
         else
             this.gender = "Девушка";
+
         this.info = t.get(5);
 
-        if (t.get(6) != null || !t.get(6).equals("None"))
-            this.friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
-        else
-            this.friends = new ArrayList<>();
+        try {
+            if (!t.get(6).equals("None"))
+                this.friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
+        }
+        finally {
+            if (this.friends == null)
+                this.friends = new ArrayList<>();
+        }
 
-        if (t.get(7) != null) {
-            if (!t.get(7).equals("None"))
-                this.notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
-            else
+        try {
+            if (t.get(7) != null)
+                if (!t.get(7).equals("None"))
+                    this.notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
+        }
+        finally {
+            if (this.notLovedBy == null)
                 this.notLovedBy = new ArrayList<>();
         }
-        else
-            this.notLovedBy = new ArrayList<>();
+
+        try {
+            if (t.get(8) != null) {
+                if (!t.get(8).equals("None")) {
+                    List<String> hobbyValues = new ArrayList<>(Arrays.asList(t.get(8).split(",")));
+                    userHobbies = new ArrayList<>();
+                    for (String value : hobbyValues) {
+                        userHobbies.add(Hobbies.getHobbyBySpecificValue(value));
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (this.userHobbies == null)
+                this.userHobbies = new ArrayList<>();
+        }
+
+    }
+
+    public String getStrHobbies() {
+        String result = "Твои интересы: \n";
+        if (userHobbies.isEmpty())
+            return "Нет хобби";
+        for (Hobbies temp : userHobbies) {
+            result += temp.getTitle() + "\n";
+        }
+        return result;
+    }
+
+    public String getStrUserHobbies() {
+        String result = "";
+        for (Hobbies temp : userHobbies) {
+            result += temp.getSpecificValue()+",";
+        }
+        return result;
+    }
+
+    public List<Hobbies> getUserHobbies() {
+        return userHobbies;
+    }
+
+    public void addHobby(Hobbies hobby) {
+        userHobbies.add(hobby);
+    }
+
+    public void deleteHobby(Hobbies hobby) {
+        if (userHobbies.contains(hobby))
+            userHobbies.remove(hobby);
     }
 
     public String getStrFriends() {

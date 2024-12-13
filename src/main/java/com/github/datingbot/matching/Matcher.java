@@ -28,6 +28,8 @@ public class Matcher {
             profile.deleteWatchedProfiles();
             profile.deleteNotLovedBy();
         }
+        System.out.println(profile.getWatchedProfiles());
+        System.out.println(profile.getNotLovedBy());
         allChatIds.removeAll(notRecomendedMatches);
         List<String> notUsedMatches = new ArrayList<String>(allChatIds);
         for (String chatId : notUsedMatches) {
