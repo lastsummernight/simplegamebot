@@ -48,41 +48,50 @@ public class Profile {
         this.info = t.get(5);
 
         try {
-            if (!t.get(6).equals("None"))
-                this.friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
+            if (!t.get(6).equals("None")) {
+                friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
+                if (friends.get(0) == "")
+                    friends.remove(0);
+            }
+        }
+        catch (Exception e) {
+            System.out.println("||| Exception with <friends> into <Profile>:\n" + e);
         }
         finally {
-            if (this.friends == null)
-                this.friends = new ArrayList<>();
+            if (friends == null)
+                friends = new ArrayList<>();
         }
 
         try {
-            if (t.get(7) != null)
-                if (!t.get(7).equals("None"))
-                    this.notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
+            if (!t.get(7).equals("None")) {
+                notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
+                if (notLovedBy.get(0) == "")
+                    notLovedBy.remove(0);
+            }
+        }
+        catch (Exception e) {
+            System.out.println("||| Exception with <notLovedBy> into <Profile>:\n" + e);
         }
         finally {
-            if (this.notLovedBy == null)
-                this.notLovedBy = new ArrayList<>();
+            if (notLovedBy == null)
+                notLovedBy = new ArrayList<>();
         }
 
         try {
-            if (t.get(8) != null) {
-                if (!t.get(8).equals("None")) {
-                    List<String> hobbyValues = new ArrayList<>(Arrays.asList(t.get(8).split(",")));
-                    userHobbies = new ArrayList<>();
-                    for (String value : hobbyValues) {
-                        userHobbies.add(Hobbies.getHobbyBySpecificValue(value));
-                    }
+            if (!t.get(8).equals("None")) {
+                List<String> hobbyValues = new ArrayList<>(Arrays.asList(t.get(8).split(",")));
+                userHobbies = new ArrayList<>();
+                for (String value : hobbyValues) {
+                    userHobbies.add(Hobbies.getHobbyBySpecificValue(value));
                 }
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("||| Exception with <userHobbies> into <Profile>\n" + e);
         }
         finally {
-            if (this.userHobbies == null)
-                this.userHobbies = new ArrayList<>();
+            if (userHobbies == null)
+                userHobbies = new ArrayList<>();
         }
 
     }

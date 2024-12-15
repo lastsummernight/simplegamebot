@@ -119,7 +119,6 @@ public class DatabaseManager {
                 String userFriends = resultSet.getString("friends");
                 String userNotFriends = resultSet.getString("notfriends");
                 String userHobbies = resultSet.getString("hobbies");
-                System.out.println(userFriends);
 
                 Profile user = new Profile(Arrays.asList(userId, userName, userAge, userCity,
                         userGender, userInfo, userFriends, userNotFriends, userHobbies));

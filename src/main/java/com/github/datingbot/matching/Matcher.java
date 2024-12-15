@@ -23,13 +23,11 @@ public class Matcher {
             //Если закончились все подходящие матчи
             //должны предложить пользователю начать смотреть анкеты с самого начала?
             //Пока что будем делать это насильно
-            System.out.println("empty");
+            System.out.println("||| EMPTY LIST OF RECS");
             notRecomendedMatches.clear();
             profile.deleteWatchedProfiles();
             profile.deleteNotLovedBy();
         }
-        System.out.println(profile.getWatchedProfiles());
-        System.out.println(profile.getNotLovedBy());
         allChatIds.removeAll(notRecomendedMatches);
         List<String> notUsedMatches = new ArrayList<String>(allChatIds);
         for (String chatId : notUsedMatches) {
