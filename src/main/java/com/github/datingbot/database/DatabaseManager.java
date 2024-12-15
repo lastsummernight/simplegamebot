@@ -2,16 +2,12 @@ package com.github.datingbot.database;
 
 import com.github.datingbot.auxiliary.Debugger;
 import com.github.datingbot.profile.Profile;
-import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.github.datingbot.auxiliary.State.USER_STATE_MAIN_MENU;
 
 public class DatabaseManager {
     private static final String URL = "jdbc:sqlite:datingbotdb.db";
@@ -151,9 +147,9 @@ public class DatabaseManager {
             else
                 preparedStatement.setString(5, "0");
             preparedStatement.setString(6, profile.getInfo());
-            preparedStatement.setString(7, profile.getStrFriends());
-            preparedStatement.setString(8, profile.getStrNotFriends());
-            preparedStatement.setString(9, profile.getStrUserHobbies());
+            preparedStatement.setString(7, profile.getStrFriendsDB());
+            preparedStatement.setString(8, profile.getStrNotFriendsDB());
+            preparedStatement.setString(9, profile.getStrHobbiesDB());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) inserted.");
@@ -177,9 +173,9 @@ public class DatabaseManager {
             else
                 preparedStatement.setString(4, "0");
             preparedStatement.setString(5, profile.getInfo());
-            preparedStatement.setString(6, profile.getStrFriends());
-            preparedStatement.setString(7, profile.getStrNotFriends());
-            preparedStatement.setString(8, profile.getStrUserHobbies());
+            preparedStatement.setString(6, profile.getStrFriendsDB());
+            preparedStatement.setString(7, profile.getStrNotFriendsDB());
+            preparedStatement.setString(8, profile.getStrHobbiesDB());
             preparedStatement.setString(9, profile.getChatId());
 
             int rowsAffected = preparedStatement.executeUpdate();
