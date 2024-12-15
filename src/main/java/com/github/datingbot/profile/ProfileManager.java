@@ -55,7 +55,7 @@ public class ProfileManager {
     }
 
     private static void supportGender(Message message, Profile profile, boolean flag) {
-        if ((message.getText().compareTo("Парень") == 0) || (message.getText().compareTo("Девушка") == 0)) {
+        if ((message.getText().equals("Парень")) || (message.getText().equals("Девушка"))) {
             profile.setGender(message.getText());
             if (!flag) {
                 profile.setUserState(USER_INFO);
