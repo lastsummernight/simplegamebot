@@ -2,6 +2,7 @@ package com.github.datingbot;
 
 import com.github.datingbot.auxiliary.Debugger;
 import com.github.datingbot.auxiliary.Hobbies;
+import com.github.datingbot.auxiliary.exceptions.EndOfRecommendationsException;
 import com.github.datingbot.auxiliary.exceptions.MyException;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
@@ -160,26 +161,65 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         Profile currentUser = allUsers.get(chatId);
         if (messageText.equals("Назад")) {
             currentUser.setUserState(USER_STATE_MAIN_MENU);
+            DatabaseManager.changeUser(currentUser);
             MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD);
         }
         else if (messageText.equals("♥")) {
             currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
             currentUser.addFriend(currentUser.getLastViewedProfile());
-            Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
-            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
-            currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+            try {
+                Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
+                MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
+                currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+            }
+            catch (EndOfRecommendationsException e) {
+                currentUser.setUserState(USER_STATE_MAIN_MENU);
+                DatabaseManager.changeUser(currentUser);
+                MessageBuilder.usualMessage(chatId, "Простите в данный момент подходящих профилей нет :(", MAIN_MENU_KEYBOARD);
+            }
         }
         else if (messageText.equals(BROKEN_HEART)) {
             currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
-            //этот сценарий возможен лишь при повторном пробеге по всем пользователям
-            currentUser.deleteFriend(currentUser.getLastViewedProfile());
             allUsers.get(currentUser.getLastViewedProfile()).addNotLovedBy(chatId);
-            //TODO: стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
-            Profile FoundedMatch = Matcher.findAnotherPerson(currentUser,allUsers);
-            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
-            currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+            //этот сценарий возможен лишь при повторном пробеге по всем пользователям
+//            currentUser.deleteFriend(currentUser.getLastViewedProfile());
+            // TODO: стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
+            try {
+                Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
+                MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
+                currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+            }
+            catch (EndOfRecommendationsException e) {
+                currentUser.setUserState(USER_STATE_MAIN_MENU);
+                DatabaseManager.changeUser(currentUser);
+                MessageBuilder.usualMessage(chatId, "Простите в данный момент подходящих профилей нет :(", MAIN_MENU_KEYBOARD);
+            }
         }
         else MessageBuilder.usualMessage(chatId, "something wrong", MAIN_MENU_KEYBOARD);
+    }
+
+    private void connectionMenuFunction(String chatId, String messageText) {
+        Profile currentUser = allUsers.get(chatId);
+
+        if (messageText.equals("Назад")) {
+            System.out.println("||| from <connection menu> to <main menu>");
+            currentUser.setUserState(USER_STATE_MAIN_MENU);
+            MessageBuilder.usualMessage(chatId, "Выберите команду на клавиатуре", MAIN_MENU_KEYBOARD);
+            DatabaseManager.changeUser(currentUser);
+        }
+
+        else if (messageText.equals("Изменить оценку")) {
+
+        }
+
+        else if (messageText.equals("Запросы")) {
+
+        }
+
+        else  {
+            System.out.println("||| DEFAULT");
+            MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", HOBBY_KEYBOARD);
+        }
     }
 
     private void mainMenuFunction(String chatId, String messageText) {
@@ -192,11 +232,23 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
         // CHANGES STATE TO USER_STATE_FINDING
         else if (messageText.equals("Поиск")) {
-            Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
-            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
-            currentUser.setUserState(USER_STATE_FINDING);
-            currentUser.setLastViewedProfile(FoundedMatch.getChatId());
-            MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
+            try {
+                Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
+                MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
+                currentUser.setUserState(USER_STATE_FINDING);
+                currentUser.setLastViewedProfile(FoundedMatch.getChatId());
+                MessageBuilder.usualMessage(chatId, FoundedMatch.getStr(), FINDING_KEYBOARD);
+            }
+            catch (EndOfRecommendationsException e) {
+                MessageBuilder.usualMessage(chatId, "Простите в данный момент подходящих профилей нет :(", MAIN_MENU_KEYBOARD);
+            }
+        }
+
+        else if (messageText.equals("Анкеты")) {
+            currentUser.setUserState(USER_CONNECTIONS);
+            MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: " +
+                    currentUser.getStrNotFriends() + "\nЛюди, которые вам понравились: " +
+                    currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
         }
 
         // UNKNOWN MESSAGE
@@ -226,11 +278,12 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                 }
                 else {
                     switch (currentUser.getUserState()) {
-                        case USER_PROFILE -> viewProfileFunction(chatId,messageText);
-                        case USER_PROFILE_CHANGE -> changeProfileFunction(chatId,userMessage);
-                        case USER_PROFILE_HOBBIES -> changeHobbiesFunction(chatId,userMessage);
-                        case USER_STATE_FINDING -> findingFunction(chatId,messageText);
-                        default -> mainMenuFunction(chatId,messageText);
+                        case USER_PROFILE -> viewProfileFunction(chatId, messageText);
+                        case USER_PROFILE_CHANGE -> changeProfileFunction(chatId, userMessage);
+                        case USER_PROFILE_HOBBIES -> changeHobbiesFunction(chatId, userMessage);
+                        case USER_STATE_FINDING -> findingFunction(chatId, messageText);
+                        case USER_CONNECTIONS -> connectionMenuFunction(chatId, messageText);
+                        default -> mainMenuFunction(chatId, messageText);
                     }
                 }
             }
