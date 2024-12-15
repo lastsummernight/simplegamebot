@@ -12,6 +12,8 @@ public enum Keyboard {
     PROFILE_CHANGE_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_PROFILE_CHANGE)),
     VIEW_PROFILE_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_PROFILE)),
     HOBBY_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_PROFILE_HOBBIES)),
+    CONNECTIONS_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_CONNECTIONS)),
+    REQUESTS_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_REQUESTS)),
     EMPTY_KEYBOARD(KeyboardBuilder.buildKeyboard(EMPTY));
 
     private ReplyKeyboardMarkup keyboardMarkup;

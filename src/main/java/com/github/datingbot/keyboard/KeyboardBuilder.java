@@ -64,6 +64,20 @@ public class KeyboardBuilder {
                 keyboard.add(keyboardRow);
                 break;
 
+            case USER_CONNECTIONS:
+                keyboardRow.add("Изменить оценку");
+                keyboardRow.add("Запросы");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
+            case USER_REQUESTS:
+                keyboardRow.add("Дать тг");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
+
             case USER_PROFILE_HOBBIES:
                 for (int i = 0; i < allHobbies.size(); i++) {
                     keyboardRow.add(allHobbies.get(i).getTitle());
