@@ -12,6 +12,8 @@ public enum State {
     USER_PROFILE,
     USER_PROFILE_CHANGE,
     USER_PROFILE_HOBBIES,
+    USER_CONNECTIONS,
+    USER_REQUESTS,
     EMPTY;
 
     private String title;
