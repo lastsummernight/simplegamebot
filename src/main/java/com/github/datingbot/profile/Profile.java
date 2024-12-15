@@ -17,8 +17,8 @@ public class Profile {
     private String info;
 
     private List<Hobbies> userHobbies;
-    private List<String> friends;
-    private List<String> notLovedBy; // Пользователи которые отвергли этот профиль
+    private Set<String> friends;
+    private Set<String> notLovedBy; // Пользователи которые отвергли этот профиль
     private Set<String> watchedProfiles;
     private String lastViewedProfile;
     private State tempInfo = null;
@@ -26,10 +26,11 @@ public class Profile {
     public Profile(String id, State state) {
         chatId = id;
         userState = state;
-        friends = new ArrayList<>();
+        friends = new HashSet<>();
         watchedProfiles = new HashSet<>();
         watchedProfiles.add(chatId);
-        notLovedBy = new ArrayList<>();
+        notLovedBy = new HashSet<>();
+        notLovedBy.add(chatId);
         userHobbies = new ArrayList<>();
     }
 
@@ -49,9 +50,7 @@ public class Profile {
 
         try {
             if (!t.get(6).equals("None")) {
-                friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
-                if (friends.get(0) == "")
-                    friends.remove(0);
+                friends = new HashSet<>(Arrays.asList(t.get(6).split(",")));
             }
         }
         catch (Exception e) {
@@ -59,14 +58,12 @@ public class Profile {
         }
         finally {
             if (friends == null)
-                friends = new ArrayList<>();
+                friends = new HashSet<>();
         }
 
         try {
             if (!t.get(7).equals("None")) {
-                notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
-                if (notLovedBy.get(0) == "")
-                    notLovedBy.remove(0);
+                notLovedBy = new HashSet<>(Arrays.asList(t.get(7).split(",")));
             }
         }
         catch (Exception e) {
@@ -74,7 +71,8 @@ public class Profile {
         }
         finally {
             if (notLovedBy == null)
-                notLovedBy = new ArrayList<>();
+                notLovedBy = new HashSet<>();
+            notLovedBy.add(chatId);
         }
 
         try {
@@ -106,7 +104,7 @@ public class Profile {
         return result;
     }
 
-    public String getStrUserHobbies() {
+    public String getStrHobbiesDB() {
         String result = "";
         for (Hobbies temp : userHobbies) {
             result += temp.getSpecificValue()+",";
@@ -127,13 +125,19 @@ public class Profile {
             userHobbies.remove(hobby);
     }
 
-    public String getStrFriends() {
+    public String getStrFriendsDB() {
         if (friends.isEmpty())
             return "";
         return String.join(",", friends);
     }
 
-    public List<String> getFriends() {
+    public String getStrFriends() {
+        if (friends.isEmpty())
+            return "";
+        return StringFunctions.formatFriends(friends.stream().toList());
+    }
+
+    public Set<String> getFriends() {
         return friends;
     }
 
@@ -149,10 +153,16 @@ public class Profile {
         }
     }
 
-    public String getStrNotFriends() {
+    public String getStrNotFriendsDB() {
         if (notLovedBy.isEmpty())
             return "";
         return String.join(",", notLovedBy);
+    }
+
+    public String getStrNotFriends() {
+        if (notLovedBy.isEmpty())
+            return "";
+        return StringFunctions.formatFriends(notLovedBy.stream().toList());
     }
 
     public void setTempInfo(State temp) {
@@ -244,11 +254,7 @@ public class Profile {
         watchedProfiles.add(chatId);
     }
 
-    public List<String> getNotLovedBy() {
-        if (notLovedBy == null) {
-            notLovedBy = new ArrayList<>();
-            notLovedBy.add(chatId);
-        }
+    public Set<String> getNotLovedBy() {
         return notLovedBy;
     }
 
@@ -258,5 +264,6 @@ public class Profile {
 
     public void deleteNotLovedBy() {
         notLovedBy.clear();
+        notLovedBy.add(chatId);
     }
 }
