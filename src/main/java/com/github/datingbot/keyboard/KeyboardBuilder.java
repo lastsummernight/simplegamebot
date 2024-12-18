@@ -32,7 +32,7 @@ public class KeyboardBuilder {
             case USER_STATE_MAIN_MENU:
                 keyboardRow.add("Поиск");
                 keyboardRow.add("Моя анкета");
-                keyboardRow.add("Сообщения");
+                keyboardRow.add("Анкеты");
                 keyboard.add(keyboardRow);
                 break;
 
@@ -71,6 +71,13 @@ public class KeyboardBuilder {
                 keyboard.add(keyboardRow);
                 break;
 
+            case USER_MARKS:
+                keyboardRow.add("Понравившиеся");
+                keyboardRow.add("Не понравившиеся");
+                keyboardRow.add("Назад");
+                keyboard.add(keyboardRow);
+                break;
+
             case USER_REQUESTS:
                 keyboardRow.add("Дать тг");
                 keyboardRow.add("Назад");
@@ -97,6 +104,7 @@ public class KeyboardBuilder {
                 break;
 
             case EMPTY:
+                keyboardRow.add("Назад");
                 keyboard.add(keyboardRow);
                 break;
         }

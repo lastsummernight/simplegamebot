@@ -148,7 +148,7 @@ public class DatabaseManager {
                 preparedStatement.setString(5, "0");
             preparedStatement.setString(6, profile.getInfo());
             preparedStatement.setString(7, profile.getStrFriendsDB());
-            preparedStatement.setString(8, profile.getStrNotFriendsDB());
+            preparedStatement.setString(8, profile.getStrNotLovedByDB());
             preparedStatement.setString(9, profile.getStrHobbiesDB());
 
             int rowsAffected = preparedStatement.executeUpdate();
@@ -174,7 +174,7 @@ public class DatabaseManager {
                 preparedStatement.setString(4, "0");
             preparedStatement.setString(5, profile.getInfo());
             preparedStatement.setString(6, profile.getStrFriendsDB());
-            preparedStatement.setString(7, profile.getStrNotFriendsDB());
+            preparedStatement.setString(7, profile.getStrNotLovedByDB());
             preparedStatement.setString(8, profile.getStrHobbiesDB());
             preparedStatement.setString(9, profile.getChatId());
 

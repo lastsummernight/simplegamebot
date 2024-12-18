@@ -205,20 +205,59 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             System.out.println("||| from <connection menu> to <main menu>");
             currentUser.setUserState(USER_STATE_MAIN_MENU);
             MessageBuilder.usualMessage(chatId, "Выберите команду на клавиатуре", MAIN_MENU_KEYBOARD);
-            DatabaseManager.changeUser(currentUser);
         }
 
         else if (messageText.equals("Изменить оценку")) {
-
+            currentUser.setUserState(USER_MARKS);
+            MessageBuilder.usualMessage(chatId, "Из какой категории: ", MARKS_KEYBOARD);
         }
 
         else if (messageText.equals("Запросы")) {
-
+            MessageBuilder.usualMessage(chatId, "Не реализованно", CONNECTIONS_KEYBOARD);
         }
 
         else  {
             System.out.println("||| DEFAULT");
-            MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", HOBBY_KEYBOARD);
+            MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", CONNECTIONS_KEYBOARD);
+        }
+    }
+
+    private void marksMenuFunction(String chatId, String messageText) {
+        Profile currentUser = allUsers.get(chatId);
+        int currentUserToDo = StringFunctions.isNum(messageText);
+
+        if (messageText.equals("Назад")) {
+            System.out.println("||| from <marks menu> to <main menu>");
+            currentUser.setUserState(USER_CONNECTIONS);
+            currentUser.setFlagForMarks(0);
+            MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
+                    currentUser.getStrNotLovedBy() + "\nЛюди, которые вам понравились: \n" +
+                    currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
+            DatabaseManager.changeUser(currentUser);
+        }
+
+        else if (messageText.equals("Понравившиеся")) {
+            currentUser.setFlagForMarks(1);
+            MessageBuilder.usualMessage(chatId, "Выбери порядковый номер человека: ", EMPTY_KEYBOARD);
+        }
+
+        else if (messageText.equals("Не понравившиеся")) {
+            currentUser.setFlagForMarks(-1);
+            MessageBuilder.usualMessage(chatId, "Выбери порядковый номер человека: ", EMPTY_KEYBOARD);
+        }
+
+        else if (currentUserToDo != -1) {
+            if (currentUser.getFlagForMarks() == 1) {
+                currentUser.deleteFriend(currentUserToDo);
+            }
+            else if (currentUser.getFlagForMarks() == -1) {
+                currentUser.deleteNotLovedBy(currentUserToDo);
+            }
+        }
+
+        else  {
+            System.out.println("||| DEFAULT");
+            MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", MARKS_KEYBOARD);
         }
     }
 
@@ -246,8 +285,8 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
 
         else if (messageText.equals("Анкеты")) {
             currentUser.setUserState(USER_CONNECTIONS);
-            MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: " +
-                    currentUser.getStrNotFriends() + "\nЛюди, которые вам понравились: " +
+            MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
+                    currentUser.getStrNotLovedBy() + "\nЛюди, которые вам понравились: \n" +
                     currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
         }
 
@@ -283,6 +322,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                         case USER_PROFILE_HOBBIES -> changeHobbiesFunction(chatId, userMessage);
                         case USER_STATE_FINDING -> findingFunction(chatId, messageText);
                         case USER_CONNECTIONS -> connectionMenuFunction(chatId, messageText);
+                        case USER_MARKS -> marksMenuFunction(chatId, messageText);
                         default -> mainMenuFunction(chatId, messageText);
                     }
                 }

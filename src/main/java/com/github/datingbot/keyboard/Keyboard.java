@@ -13,6 +13,7 @@ public enum Keyboard {
     VIEW_PROFILE_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_PROFILE)),
     HOBBY_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_PROFILE_HOBBIES)),
     CONNECTIONS_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_CONNECTIONS)),
+    MARKS_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_MARKS)),
     REQUESTS_KEYBOARD(KeyboardBuilder.buildKeyboard(USER_REQUESTS)),
     EMPTY_KEYBOARD(KeyboardBuilder.buildKeyboard(EMPTY));
 

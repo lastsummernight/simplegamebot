@@ -21,6 +21,8 @@ public class StringFunctions
     }
 
     public static String formatFriends(List<String> temp) {
+        if (temp.size() == 0)
+            return "";
         StringBuilder returned = new StringBuilder();
         for (int i = 0; i < temp.size(); i++) {
             returned.append(i + 1);

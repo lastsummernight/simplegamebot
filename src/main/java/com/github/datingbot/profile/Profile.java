@@ -22,6 +22,8 @@ public class Profile {
     private Set<String> watchedProfiles;
     private String lastViewedProfile;
     private State tempInfo = null;
+    private int flagForMarks;
+
 
     public Profile(String id, State state) {
         chatId = id;
@@ -48,50 +50,27 @@ public class Profile {
 
         this.info = t.get(5);
 
-        try {
-            if (!t.get(6).equals("None")) {
-                friends = new HashSet<>(Arrays.asList(t.get(6).split(",")));
+        if (!t.get(6).equals("None")) {
+            friends = new HashSet<>(Arrays.asList(t.get(6).split(",")));
+        }
+        else
+            friends = new HashSet<>();
+
+        if (!t.get(7).equals("None")) {
+            notLovedBy = new HashSet<>(Arrays.asList(t.get(7).split(",")));
+        }
+        else
+            notLovedBy = new HashSet<>();
+
+        if (!t.get(8).equals("None")) {
+            List<String> hobbyValues = new ArrayList<>(Arrays.asList(t.get(8).split(",")));
+            userHobbies = new ArrayList<>();
+            for (String value : hobbyValues) {
+                userHobbies.add(Hobbies.getHobbyBySpecificValue(value));
             }
         }
-        catch (Exception e) {
-            System.out.println("||| Exception with <friends> into <Profile>:\n" + e);
-        }
-        finally {
-            if (friends == null)
-                friends = new HashSet<>();
-        }
-
-        try {
-            if (!t.get(7).equals("None")) {
-                notLovedBy = new HashSet<>(Arrays.asList(t.get(7).split(",")));
-            }
-        }
-        catch (Exception e) {
-            System.out.println("||| Exception with <notLovedBy> into <Profile>:\n" + e);
-        }
-        finally {
-            if (notLovedBy == null)
-                notLovedBy = new HashSet<>();
-            notLovedBy.add(chatId);
-        }
-
-        try {
-            if (!t.get(8).equals("None")) {
-                List<String> hobbyValues = new ArrayList<>(Arrays.asList(t.get(8).split(",")));
-                userHobbies = new ArrayList<>();
-                for (String value : hobbyValues) {
-                    userHobbies.add(Hobbies.getHobbyBySpecificValue(value));
-                }
-            }
-        }
-        catch (Exception e) {
-            System.out.println("||| Exception with <userHobbies> into <Profile>\n" + e);
-        }
-        finally {
-            if (userHobbies == null)
-                userHobbies = new ArrayList<>();
-        }
-
+        else
+            userHobbies = new ArrayList<>();
     }
 
     public String getStrHobbies() {
@@ -105,6 +84,9 @@ public class Profile {
     }
 
     public String getStrHobbiesDB() {
+        if (userHobbies.isEmpty()) {
+            return "None";
+        }
         String result = "";
         for (Hobbies temp : userHobbies) {
             result += temp.getSpecificValue()+",";
@@ -127,7 +109,7 @@ public class Profile {
 
     public String getStrFriendsDB() {
         if (friends.isEmpty())
-            return "";
+            return "None";
         return String.join(",", friends);
     }
 
@@ -153,16 +135,65 @@ public class Profile {
         }
     }
 
-    public String getStrNotFriendsDB() {
+    public void deleteFriend(int idx) {
+        List<String> temp = friends.stream().toList();
+        try {
+            System.out.println("||| temp.get(idx) = " + temp.get(idx - 1));
+            friends.remove(temp.get(idx - 1));
+        }
+        catch (Exception e) {
+            System.out.println("||| Exception in <profile.deleteFriend>:\n" + e);
+        }
+    }
+
+    public String getStrNotLovedByDB() {
         if (notLovedBy.isEmpty())
-            return "";
+            return "None";
         return String.join(",", notLovedBy);
     }
 
-    public String getStrNotFriends() {
+    public String getStrNotLovedBy() {
         if (notLovedBy.isEmpty())
             return "";
+        System.out.println(notLovedBy);
         return StringFunctions.formatFriends(notLovedBy.stream().toList());
+    }
+
+    public Set<String> getNotLovedBy() {
+        return notLovedBy;
+    }
+
+    public void addNotLovedBy(String anothersUserChatId) {
+        notLovedBy.add(anothersUserChatId);
+    }
+
+    public void deleteNotLovedBy(String chatId) {
+        if (notLovedBy.contains(chatId))
+            notLovedBy.remove(chatId);
+    }
+
+    public void deleteNotLovedBy(int idx) {
+        List<String> temp = notLovedBy.stream().toList();
+        try {
+            System.out.println("||| temp.get(idx) = " + temp.get(idx - 1));
+            notLovedBy.remove(temp.get(idx - 1));
+        }
+        catch (Exception e) {
+            System.out.println("||| Exception in <profile.deleteNotLovedBy>:\n" + e);
+        }
+    }
+
+    public void deleteAllNotLovedBy() {
+        notLovedBy.clear();
+        notLovedBy.add(chatId);
+    }
+
+    public int getFlagForMarks() {
+        return flagForMarks;
+    }
+
+    public void setFlagForMarks(int flagForMarks) {
+        this.flagForMarks = flagForMarks;
     }
 
     public void setTempInfo(State temp) {
@@ -252,18 +283,5 @@ public class Profile {
     public void deleteWatchedProfiles() {
         watchedProfiles.clear();
         watchedProfiles.add(chatId);
-    }
-
-    public Set<String> getNotLovedBy() {
-        return notLovedBy;
-    }
-
-    public void addNotLovedBy(String anothersUserChatId) {
-        notLovedBy.add(anothersUserChatId);
-    }
-
-    public void deleteNotLovedBy() {
-        notLovedBy.clear();
-        notLovedBy.add(chatId);
     }
 }
