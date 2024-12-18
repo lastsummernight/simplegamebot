@@ -22,9 +22,6 @@ public class Matcher {
         notRecomendedMatches.addAll(profile.getFriends());
         notRecomendedMatches.addAll(profile.getNotLovedBy());
         if (notRecomendedMatches.containsAll(allChatIds)){
-            //Если закончились все подходящие матчи
-            //должны предложить пользователю начать смотреть анкеты с самого начала?
-            //Пока что будем делать это насильно
             System.out.println("||| EMPTY LIST OF RECS");
             throw new EndOfRecommendationsException();
 //            notRecomendedMatches.clear();

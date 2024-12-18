@@ -27,7 +27,7 @@ public class Debugger {
         printStream.println("   Gender = " + profile.getGender());
         printStream.println("   Info = " + profile.getInfo());
         printStream.println("   Friends = " + profile.getStrFriends());
-        printStream.println("   NotFriends = " + profile.getStrNotLovedBy());
+        printStream.println("   NotFriends = " + profile.getStrNotLoved());
         printStream.println("   Hobbies = " + profile.getStrHobbies());
         printStream.println("}");
     }

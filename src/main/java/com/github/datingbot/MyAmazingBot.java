@@ -231,7 +231,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             currentUser.setUserState(USER_CONNECTIONS);
             currentUser.setFlagForMarks(0);
             MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
-                    currentUser.getStrNotLovedBy() + "\nЛюди, которые вам понравились: \n" +
+                    currentUser.getStrNotLoved() + "\nЛюди, которые вам понравились: \n" +
                     currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
             DatabaseManager.changeUser(currentUser);
         }
@@ -286,7 +286,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         else if (messageText.equals("Анкеты")) {
             currentUser.setUserState(USER_CONNECTIONS);
             MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
-                    currentUser.getStrNotLovedBy() + "\nЛюди, которые вам понравились: \n" +
+                    currentUser.getStrNotLoved() + "\nЛюди, которые вам понравились: \n" +
                     currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
         }
 

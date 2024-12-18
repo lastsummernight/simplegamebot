@@ -152,11 +152,18 @@ public class Profile {
         return String.join(",", notLovedBy);
     }
 
-    public String getStrNotLovedBy() {
-        if (notLovedBy.isEmpty())
-            return "";
-        System.out.println(notLovedBy);
-        return StringFunctions.formatFriends(notLovedBy.stream().toList());
+    public String getStrNotLoved() {
+        if (watchedProfiles != null) {
+            Set <String> notLoved = new HashSet<>(Set.copyOf(watchedProfiles));
+            notLoved.removeAll(friends);
+            System.out.println("watchedProfiles : " + watchedProfiles);
+            System.out.println("friends : " + friends);
+            System.out.println("notLoved : " + notLoved);
+            if (notLoved.isEmpty())
+                return "";
+            return StringFunctions.formatFriends(notLoved.stream().toList());
+        }
+        return "";
     }
 
     public Set<String> getNotLovedBy() {
