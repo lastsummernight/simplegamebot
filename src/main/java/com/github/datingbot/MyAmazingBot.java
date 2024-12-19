@@ -180,6 +180,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         }
         else if (messageText.equals(BROKEN_HEART)) {
             currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
+            currentUser.addNotLoved(currentUser.getLastViewedProfile());
             allUsers.get(currentUser.getLastViewedProfile()).addNotLovedBy(chatId);
             //этот сценарий возможен лишь при повторном пробеге по всем пользователям
 //            currentUser.deleteFriend(currentUser.getLastViewedProfile());
@@ -213,6 +214,13 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         else if (messageText.equals("Запросы")) {
+            List <String> MatchedUsers = new ArrayList<>();
+            List <String> tempSet = currentUser.getFriends();
+            for (String anotherProfile : tempSet){
+                if (allUsers.get(anotherProfile).getFriends().contains(chatId)){
+                    MatchedUsers.add(anotherProfile);
+                }
+            }
             MessageBuilder.usualMessage(chatId, "Не реализованно", CONNECTIONS_KEYBOARD);
         }
 
@@ -231,8 +239,8 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             currentUser.setUserState(USER_CONNECTIONS);
             currentUser.setFlagForMarks(0);
             MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
-                    currentUser.getStrNotLoved() + "\nЛюди, которые вам понравились: \n" +
-                    currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
+                    currentUser.getStrProfilesNotLoved(allUsers) + "\nЛюди, которые вам понравились: \n" +
+                    currentUser.getStrProfilesFriends(allUsers) + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
             DatabaseManager.changeUser(currentUser);
         }
 
@@ -251,7 +259,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                 currentUser.deleteFriend(currentUserToDo);
             }
             else if (currentUser.getFlagForMarks() == -1) {
-                currentUser.deleteNotLovedBy(currentUserToDo);
+                currentUser.deleteNotLoved(currentUserToDo);
             }
         }
 
@@ -286,8 +294,8 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         else if (messageText.equals("Анкеты")) {
             currentUser.setUserState(USER_CONNECTIONS);
             MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
-                    currentUser.getStrNotLoved() + "\nЛюди, которые вам понравились: \n" +
-                    currentUser.getStrFriends() + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
+                    currentUser.getStrProfilesNotLoved(allUsers) + "\nЛюди, которые вам понравились: \n" +
+                    currentUser.getStrProfilesFriends(allUsers) + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
         }
 
         // UNKNOWN MESSAGE
