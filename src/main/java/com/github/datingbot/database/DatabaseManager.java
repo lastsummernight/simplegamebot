@@ -9,17 +9,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+/*
+ * table <users> description:
+ * user_id - chatId of user
+ * name
+ * age
+ * city
+ * gender
+ * info
+ * friends - people liked by user
+ * notfriends - people who disliked user, equal to <notLovedBy>
+ * hobbies - user hobbies
+ * not_loved - people disliked by user, equal to <notLoved>
+ * tagged - people which recive user request, equal to <taggedUsers>
+*/
+
 public class DatabaseManager {
     private static final String URL = "jdbc:sqlite:datingbotdb.db";
     private static Connection connection = null;
-
-//    public static void main(String[] args) {
-//        connectDB();
-//        extraCreateTable();
-//        addUser(new Profile("123123", USER_STATE_MAIN_MENU, "Motya", 20, "Msk", true, "О себе", "123"));
-//        ePrintTable();
-//        closeConnectDB();
-//    }
 
     public static void connectDB() {
         try {
@@ -29,26 +36,6 @@ public class DatabaseManager {
         } catch (SQLException e) {
             System.out.println("Connection failed!");
             e.printStackTrace();
-        }
-    }
-
-    public static void extraCreateTable() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS users ("
-                + "user_id INTEGER UNIQUE PRIMARY KEY, "
-                + "name TEXT, "
-                + "age INTEGER, "
-                + "city TEXT, "
-                + "gender BOOLEAN, "
-                + "info TEXT, "
-                + "friends TEXT);";
-
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.execute(createTableSQL);
-            System.out.println("table users created");
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
     }
 
@@ -71,6 +58,8 @@ public class DatabaseManager {
                 temp.add(resultSet.getString("friends"));
                 temp.add(resultSet.getString("notfriends"));
                 temp.add(resultSet.getString("hobbies"));
+                temp.add(resultSet.getString("not_loved"));
+                temp.add(resultSet.getString("tagged"));
                 Debugger.printProfile(new Profile(temp));
             }
 
@@ -84,12 +73,12 @@ public class DatabaseManager {
     }
 
     public static void extraCreateAttr() {
-        String statement = "ALTER TABLE users ADD COLUMN hobbies TEXT";
+        String statement = "ALTER TABLE users ADD COLUMN tagged TEXT";
 
         try {
             Statement preparedStatement = connection.createStatement();
             preparedStatement.execute(statement);
-            System.out.println("attr column created");
+            System.out.println("tagged column created");
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -115,9 +104,11 @@ public class DatabaseManager {
                 String userFriends = resultSet.getString("friends");
                 String userNotFriends = resultSet.getString("notfriends");
                 String userHobbies = resultSet.getString("hobbies");
+                String userNotLoved = resultSet.getString("not_loved");
+                String userTaggedUsers = resultSet.getString("tagged");
 
                 Profile user = new Profile(Arrays.asList(userId, userName, userAge, userCity,
-                        userGender, userInfo, userFriends, userNotFriends, userHobbies));
+                        userGender, userInfo, userFriends, userNotFriends, userHobbies, userNotLoved, userTaggedUsers));
 
                 allUsers.put(userId, user);
             }
@@ -133,7 +124,7 @@ public class DatabaseManager {
     }
 
     public static void addUser(Profile profile) {
-        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends, notfriends, hobbies) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (user_id, name, age, city, gender, info, friends, notfriends, hobbies, not_loved, tagged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -150,6 +141,8 @@ public class DatabaseManager {
             preparedStatement.setString(7, profile.getStrFriendsDB());
             preparedStatement.setString(8, profile.getStrNotLovedByDB());
             preparedStatement.setString(9, profile.getStrHobbiesDB());
+            preparedStatement.setString(10, profile.getStrNotLovedDB());
+            preparedStatement.setString(11, profile.getStrTaggedUsersDB());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) inserted.");
@@ -160,7 +153,7 @@ public class DatabaseManager {
 
 
     public static void changeUser(Profile profile) {
-        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ?, notfriends = ?, hobbies = ? WHERE user_id = ?";
+        String query = "UPDATE users SET name = ?, age = ?, city = ?, gender = ?, info = ?, friends = ?, notfriends = ?, hobbies = ?, not_loved = ?, tagged = ? WHERE user_id = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -176,7 +169,9 @@ public class DatabaseManager {
             preparedStatement.setString(6, profile.getStrFriendsDB());
             preparedStatement.setString(7, profile.getStrNotLovedByDB());
             preparedStatement.setString(8, profile.getStrHobbiesDB());
-            preparedStatement.setString(9, profile.getChatId());
+            preparedStatement.setString(9, profile.getStrNotLovedDB());
+            preparedStatement.setString(10, profile.getStrTaggedUsersDB());
+            preparedStatement.setString(11, profile.getChatId());
 
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) updated.");
