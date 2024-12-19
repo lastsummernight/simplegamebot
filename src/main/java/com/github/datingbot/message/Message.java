@@ -1,8 +1,13 @@
 package com.github.datingbot.message;
 
+import com.github.datingbot.auxiliary.exceptions.PhotoMissingException;
 import com.github.datingbot.keyboard.Keyboard;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+
+import java.io.File;
 
 import static com.github.datingbot.keyboard.Keyboard.*;
 
@@ -11,6 +16,7 @@ public class Message {
     private String message;
     private Keyboard keyboard;
     private String chatId;
+    private String photoUrl;
 
     public Message(String chatId) {
         this.chatId = chatId;
@@ -30,11 +36,13 @@ public class Message {
     public void reset() {
         message = null;
         keyboard = EMPTY_KEYBOARD;
+        photoUrl = null;
     }
 
     public void reset(String message) {
         this.message = message;
         keyboard = EMPTY_KEYBOARD;
+        photoUrl = null;
     }
 
     public void reset(String message, Keyboard keyboard) {
@@ -42,10 +50,24 @@ public class Message {
         this.keyboard = keyboard;
     }
 
-    public SendMessage execute() {
-        SendMessage temp = new SendMessage(chatId, message);
-        temp.setReplyMarkup(keyboard.getKeyboardMarkup());
-        return temp;
+    public SendMessage execute(String chatId) {
+        SendMessage returned = new SendMessage(chatId, message);
+        returned.setReplyMarkup(keyboard.getKeyboardMarkup());
+        return returned;
+    }
+
+    public SendPhoto executeWithPhoto(String chatId) throws PhotoMissingException {
+        try {
+            InputFile inputFile = new InputFile();
+            inputFile.setMedia(new File(photoUrl));
+            SendPhoto returned = new SendPhoto(chatId, inputFile);
+            returned.setCaption(message);
+            returned.setReplyMarkup(keyboard.getKeyboardMarkup());
+            return returned;
+        }
+        catch (Exception e) {
+            throw new PhotoMissingException();
+        }
     }
 
     public ReplyKeyboardMarkup getKeyboard() {
@@ -56,15 +78,25 @@ public class Message {
         this.keyboard = keyboard;
     }
 
-    public String getChatId() {
-        return chatId;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public boolean hasPhoto() {
+        if (photoUrl != null)
+            return true;
+        return false;
     }
 }

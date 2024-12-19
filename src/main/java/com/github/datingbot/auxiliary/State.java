@@ -7,6 +7,8 @@ public enum State {
     USER_CITY("Город"),
     USER_GENDER("Пол"),
     USER_INFO("О себе"),
+    USER_PHOTO,
+    USER_HOBBIES,
     USER_STATE_MAIN_MENU("Назад"),
     USER_STATE_FINDING,
     USER_PROFILE,

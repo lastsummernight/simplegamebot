@@ -14,12 +14,16 @@ import com.github.datingbot.profile.ProfileManager;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.*;
+import java.io.File;
 
 import static com.github.datingbot.auxiliary.Debugger.printProfile;
 import static com.github.datingbot.auxiliary.Hobbies.*;
@@ -34,11 +38,12 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private HashMap<String, Hobbies> allHobbies;
     private List<State> registrationStates;
     private Set<String> allChatIds;
+
     public MyAmazingBot(String botToken) {
         telegramClient = new OkHttpTelegramClient(botToken);
         allUsers = DatabaseManager.getAllUsers();
         servicePrompts = buildMapStates(Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO, USER_STATE_MAIN_MENU));
-        registrationStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO);
+        registrationStates = Arrays.asList(USER_NAME, USER_AGE, USER_CITY, USER_GENDER, USER_INFO, USER_HOBBIES);
         allHobbies = buildMapHobbies(Arrays.asList(LITERATURE_HOBBY, DANCE_HOBBY, VIDEOGAMES_HOBBY, SCIENCE_HOBBY, SPORT_HOBBY, MUSIC_HOBBY, COOKING_HOBBY, TRAVELLING_HOBBY, ART_HOBBY));
         Debugger.setUp();
         MessageBuilder.setUp(allUsers);
@@ -79,7 +84,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             System.out.println("||| CHANGE ANKETA");
             currentUser.setUserState(USER_PROFILE_CHANGE);
             currentUser.setTempInfo(EMPTY);
-            MessageBuilder.usualMessage(chatId, currentUser.getStr() + "Выбери, что хочешь изменить", PROFILE_CHANGE_KEYBOARD);
+            MessageBuilder.usualMessage(chatId, currentUser.getStr() + "\nВыбери, что хочешь изменить", PROFILE_CHANGE_KEYBOARD);
         }
 
         else if (messageText.equals("Изменить интересы")) {
@@ -153,7 +158,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
     private void registrationFunction(String chatId, Message userMessage) {
         Profile currentUser = allUsers.get(chatId);
         System.out.println("||| +REGISTRATION " + chatId + ' ' + currentUser.getUserState());
-        ProfileManager.changeProfileLocal(userMessage, currentUser); // REGISTRATION WITH MESSAGES
+        ProfileManager.changeProfileLocal(userMessage, currentUser, telegramClient); // REGISTRATION WITH MESSAGES
     }
 
     private void findingFunction(String chatId, String messageText) {
@@ -182,9 +187,6 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
             currentUser.addNotLoved(currentUser.getLastViewedProfile());
             allUsers.get(currentUser.getLastViewedProfile()).addNotLovedBy(chatId);
-            //этот сценарий возможен лишь при повторном пробеге по всем пользователям
-//            currentUser.deleteFriend(currentUser.getLastViewedProfile());
-            // TODO: стоит сделать кнопку которая будет отвечать за удаление друзей, но не срочно.
             try {
                 Profile FoundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
                 MessageBuilder.usualMessage(chatId, FoundedMatch.getStr());
@@ -214,14 +216,17 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         else if (messageText.equals("Запросы")) {
-            List <String> MatchedUsers = new ArrayList<>();
-            List <String> tempSet = currentUser.getFriends();
-            for (String anotherProfile : tempSet){
-                if (allUsers.get(anotherProfile).getFriends().contains(chatId)){
-                    MatchedUsers.add(anotherProfile);
+            currentUser.setUserState(USER_REQUESTS);
+            List<String> matchedUsers = new ArrayList<>();
+            for (String anotherProfile : currentUser.getFriends()){
+                if (allUsers.get(anotherProfile).getFriends().contains(chatId) &&
+                        !currentUser.getTaggedUsers().contains(anotherProfile)) {
+                    matchedUsers.add(anotherProfile);
                 }
             }
-            MessageBuilder.usualMessage(chatId, "Не реализованно", CONNECTIONS_KEYBOARD);
+            currentUser.setMatchedUsers(matchedUsers);
+            MessageBuilder.usualMessage(chatId, "Взаимный лайк:\n" +
+                    StringFunctions.formatFriendsToProfile(matchedUsers, allUsers), REQUESTS_KEYBOARD);
         }
 
         else  {
@@ -235,7 +240,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         int currentUserToDo = StringFunctions.isNum(messageText);
 
         if (messageText.equals("Назад")) {
-            System.out.println("||| from <marks menu> to <main menu>");
+            System.out.println("||| from <marks menu> to <connection menu>");
             currentUser.setUserState(USER_CONNECTIONS);
             currentUser.setFlagForMarks(0);
             MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
@@ -266,6 +271,55 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
         else  {
             System.out.println("||| DEFAULT");
             MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", MARKS_KEYBOARD);
+        }
+    }
+
+    private void requestMenuFunction(String chatId, Message message) {
+        Profile currentUser = allUsers.get(chatId);
+        String messageText = message.getText();
+        int likedUser = StringFunctions.isNum(messageText);
+
+        if (messageText.equals("Назад")) {
+            System.out.println("||| from <request menu> to <connection menu>");
+            currentUser.setFlagForRequest(false);
+            currentUser.setUserState(USER_CONNECTIONS);
+            MessageBuilder.usualMessage(chatId, "Люди, которые вам не понравились: \n" +
+                    currentUser.getStrProfilesNotLoved(allUsers) + "\nЛюди, которые вам понравились: \n" +
+                    currentUser.getStrProfilesFriends(allUsers) + "\nВыберите команду на клавиатуре", CONNECTIONS_KEYBOARD);
+            DatabaseManager.changeUser(currentUser);
+        }
+
+        else if (messageText.equals("Дать тг")) {
+            currentUser.setFlagForRequest(true);
+            MessageBuilder.usualMessage(chatId, "Выбери порядковый номер человека: ", EMPTY_KEYBOARD);
+        }
+
+        else if (likedUser != -1) {
+            if (currentUser.getFlagForRequest()) {
+                try {
+                    String chatIdExtra = currentUser.getMatchedUsers().get(likedUser - 1);
+                    if (!currentUser.getTaggedUsers().contains(chatIdExtra)) {
+                        currentUser.addTaggedUsers(chatIdExtra);
+                        String username = message.getFrom().getUserName();
+                        SendMessage botAnswer = new SendMessage(chatIdExtra, "Пользователь хочет пообщаться поближе: @" + username);
+                        telegramClient.execute(botAnswer);
+                        MessageBuilder.usualMessage(chatId, "Пользователю " +
+                                allUsers.get(chatIdExtra).getUsername() + " отправлен запрос", EMPTY_KEYBOARD);
+                    }
+                    else {
+                        MessageBuilder.usualMessage(chatId, "Вы уже отправляли запрос этому пользователю", EMPTY_KEYBOARD);
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    MessageBuilder.usualMessage(chatId, "Выбери порядковый номер человека: ", EMPTY_KEYBOARD);
+                }
+            }
+        }
+
+        else  {
+            System.out.println("||| DEFAULT");
+            MessageBuilder.usualMessage(chatId, "Выберите команду с клавиатуры", CONNECTIONS_KEYBOARD);
         }
     }
 
@@ -309,7 +363,6 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             Message userMessage = update.getMessage();
             String messageText = userMessage.getText();
             String chatId = userMessage.getChatId().toString();
-            SendMessage botAnswer = null;
             Profile currentUser = allUsers.get(chatId);
 
             // FOR NEW USERS
@@ -331,13 +384,22 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                         case USER_STATE_FINDING -> findingFunction(chatId, messageText);
                         case USER_CONNECTIONS -> connectionMenuFunction(chatId, messageText);
                         case USER_MARKS -> marksMenuFunction(chatId, messageText);
+                        case USER_REQUESTS -> requestMenuFunction(chatId, userMessage);
                         default -> mainMenuFunction(chatId, messageText);
                     }
                 }
             }
 
+            SendMessage botAnswer = null;
+            SendPhoto botAnswerPhoto = null;
+
             try {
-                botAnswer = MessageBuilder.execute(chatId);
+                if (MessageBuilder.hasPhoto(chatId)) {
+                    botAnswerPhoto = MessageBuilder.executeWithPhoto(chatId);
+                }
+                else {
+                    botAnswer = MessageBuilder.execute(chatId);
+                }
             }
             catch (MyException e) {
                 Debugger.printException(e);
@@ -345,7 +407,10 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             }
 
             try {
-                telegramClient.execute(botAnswer);
+                if (botAnswerPhoto != null)
+                    telegramClient.execute(botAnswerPhoto);
+                else
+                    telegramClient.execute(botAnswer);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
