@@ -19,13 +19,25 @@ public class Profile {
     private List<Hobbies> userHobbies;
     private List<String> friends;
     private List<String> notLovedBy; // Пользователи которые отвергли этот профиль
-
     private List<String> notLoved;
-    private Set<String> watchedProfiles;
-    private String lastViewedProfile;
-    private State tempInfo = null;
-    private int flagForMarks;
+    private List<String> taggedUsers;
 
+    private Set<String> watchedProfiles;
+    private List<String> matchedUsers = new ArrayList<>();
+    private String lastViewedProfile;
+    private State tempInfo;
+
+    private int flagForMarks;
+    private boolean flagForRequest;
+
+
+    public void setMatchedUsers(List<String> temp) {
+        matchedUsers = temp;
+    }
+
+    public List<String> getMatchedUsers() {
+        return matchedUsers;
+    }
 
     public Profile(String id, State state) {
         chatId = id;
@@ -35,6 +47,7 @@ public class Profile {
         notLovedBy = new ArrayList<>();
         notLoved = new ArrayList<>();
         userHobbies = new ArrayList<>();
+        taggedUsers = new ArrayList<>();
     }
 
     public Profile(List<String> t) {
@@ -72,15 +85,26 @@ public class Profile {
         }
         else
             userHobbies = new ArrayList<>();
-        notLoved = new ArrayList<>();
+
+        if (!t.get(9).equals("None")) {
+            notLoved = new ArrayList<>(Arrays.asList(t.get(9).split(",")));
+        }
+        else
+            notLoved = new ArrayList<>();
+
+        if (!t.get(10).equals("None")) {
+            taggedUsers = new ArrayList<>(Arrays.asList(t.get(10).split(",")));
+        }
+        else
+            taggedUsers = new ArrayList<>();
     }
 
     public String getStrHobbies() {
-        String result = "Твои интересы: \n";
+        String result = "Интересы: \n";
         if (userHobbies.isEmpty())
             return "Нет хобби";
         for (Hobbies temp : userHobbies) {
-            result += temp.getTitle() + "\n";
+            result += " ->" + temp.getTitle() + "\n";
         }
         return result;
     }
@@ -101,12 +125,36 @@ public class Profile {
     }
 
     public void addHobby(Hobbies hobby) {
-        userHobbies.add(hobby);
+        if (!userHobbies.contains(hobby))
+            userHobbies.add(hobby);
     }
 
     public void deleteHobby(Hobbies hobby) {
         if (userHobbies.contains(hobby))
             userHobbies.remove(hobby);
+    }
+
+    public String getStrTaggedUsersDB() {
+        if (taggedUsers.isEmpty())
+            return "None";
+        return String.join(",", taggedUsers);
+    }
+
+    public List<String> getTaggedUsers() {
+        return taggedUsers;
+    }
+
+    public void addTaggedUsers(String anothersUserChatId) {
+        if (!(taggedUsers.contains(anothersUserChatId))) {
+            taggedUsers.add(anothersUserChatId);
+        }
+    }
+
+    // А нахуй оно нужно
+    public void deleteTaggedUsers(String anothersUserChatId) {
+        if (taggedUsers.contains(anothersUserChatId)) {
+            taggedUsers.remove(anothersUserChatId);
+        }
     }
 
     public String getStrFriendsDB() {
@@ -137,6 +185,7 @@ public class Profile {
         }
     }
 
+    // А нахуй оно нужно
     public void deleteFriend(String anothersUserChatId) {
         if (friends.contains(anothersUserChatId)) {
             friends.remove(anothersUserChatId);
@@ -159,6 +208,12 @@ public class Profile {
         return String.join(",", notLovedBy);
     }
 
+    public String getStrNotLovedDB() {
+        if (notLoved.isEmpty())
+            return "None";
+        return String.join(",", notLoved);
+    }
+
     public String getStrNotLoved() {
         if (notLoved.isEmpty())
             return "";
@@ -179,6 +234,7 @@ public class Profile {
         notLovedBy.add(anothersUserChatId);
     }
 
+    // А нахуй оно нужно
     public void deleteNotLovedBy(String chatId) {
         if (notLovedBy.contains(chatId))
             notLovedBy.remove(chatId);
@@ -194,16 +250,26 @@ public class Profile {
         }
     }
 
+    // А нахуй оно нужно
     public void deleteAllNotLovedBy() {
         notLovedBy.clear();
     }
 
+    // А нахуй оно нужно
     public List<String> getNotLoved() {
         return notLoved;
     }
 
     public void addNotLoved(String anothersUserChatId) {
         notLoved.add(anothersUserChatId);
+    }
+
+    public boolean getFlagForRequest() {
+        return flagForRequest;
+    }
+
+    public void setFlagForRequest(boolean flagForRequest) {
+        this.flagForRequest = flagForRequest;
     }
 
     public int getFlagForMarks() {
@@ -223,7 +289,8 @@ public class Profile {
     }
 
     public String getStr() {
-        return username + ' ' + StringFunctions.yearsOld(age) + " (" + gender + ")\nГород: " + city + "\n" + info;
+        return username + ' ' + StringFunctions.yearsOld(age) + " (" + gender + ")\n\nГород: " + city + "\n\nО себе:\n" +
+                info + "\n\n" + getStrHobbies();
     }
 
     public String getChatId() {
@@ -297,6 +364,7 @@ public class Profile {
         this.lastViewedProfile = lastViewedProfile;
     }
 
+    // А нахуй оно нужно
     public void deleteWatchedProfiles() {
         watchedProfiles.clear();
     }
