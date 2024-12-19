@@ -1,5 +1,8 @@
 package com.github.datingbot.auxiliary;
 
+import com.github.datingbot.profile.Profile;
+
+import java.util.HashMap;
 import java.util.List;
 
 public class StringFunctions
@@ -29,6 +32,19 @@ public class StringFunctions
             returned.append("). ");
             returned.append(temp.get(i));
             returned.append("\n");
+        }
+        return returned.toString();
+    }
+
+    public static String formatFriendsToProfile(List<String> temp, HashMap<String, Profile> allUsers) {
+        if (temp.size() == 0)
+            return "";
+        StringBuilder returned = new StringBuilder();
+        for (int i = 0; i < temp.size(); i++) {
+            returned.append(i + 1);
+            returned.append("). ");
+            returned.append(allUsers.get(temp.get(i)).getStr());
+            returned.append("\n\n");
         }
         return returned.toString();
     }

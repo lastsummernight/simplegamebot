@@ -1,8 +1,5 @@
 package com.github.datingbot.auxiliary;
 
-import jdk.dynalink.linker.LinkerServices;
-
-import java.util.Arrays;
 import java.util.List;
 
 public enum Hobbies {
