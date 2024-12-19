@@ -39,4 +39,12 @@ public enum Hobbies {
         }
         return null;
     }
+
+    public static Hobbies getHobbyByName(String name) {
+        for (Hobbies hobby : Hobbies.values()) {
+            if (hobby.title.equals(name))
+                return hobby;
+        }
+        return null;
+    }
 }
