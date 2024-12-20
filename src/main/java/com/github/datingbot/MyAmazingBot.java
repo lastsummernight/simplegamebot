@@ -161,7 +161,6 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
             DatabaseManager.changeUser(currentUser);
             MessageBuilder.usualMessage(chatId, "Выбери команду на клавиатуре", MAIN_MENU_KEYBOARD);
         } else if (messageText.equals("♥")) {
-            currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
             currentUser.addFriend(currentUser.getLastViewedProfile());
             try {
                 Profile foundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
@@ -176,9 +175,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                 MessageBuilder.usualMessage(chatId, "Простите в данный момент подходящих профилей нет :(", MAIN_MENU_KEYBOARD);
             }
         } else if (messageText.equals(BROKEN_HEART)) {
-            currentUser.addWatchedProfile(currentUser.getLastViewedProfile());
             currentUser.addNotLoved(currentUser.getLastViewedProfile());
-            allUsers.get(currentUser.getLastViewedProfile()).addNotLovedBy(chatId);
             try {
                 Profile foundedMatch = Matcher.findAnotherPerson(currentUser, allUsers);
                 if ((new File(foundedMatch.getPhotoUrl())).exists())

@@ -23,7 +23,6 @@ public class Profile {
     private List<String> notLoved;
     private List<String> taggedUsers;
 
-    private Set<String> watchedProfiles;
     private List<String> matchedUsers = new ArrayList<>();
     private String lastViewedProfile;
     private State tempInfo;
@@ -44,8 +43,6 @@ public class Profile {
         chatId = id;
         userState = state;
         friends = new ArrayList<>();
-        watchedProfiles = new HashSet<>();
-        notLovedBy = new ArrayList<>();
         notLoved = new ArrayList<>();
         userHobbies = new ArrayList<>();
         taggedUsers = new ArrayList<>();
@@ -69,11 +66,6 @@ public class Profile {
             friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
         } else
             friends = new ArrayList<>();
-
-        if (!t.get(7).equals("None")) {
-            notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
-        } else
-            notLovedBy = new ArrayList<>();
 
         if (!t.get(8).equals("None")) {
             List<String> hobbyValues = new ArrayList<>(Arrays.asList(t.get(8).split(",")));
@@ -176,7 +168,6 @@ public class Profile {
 
     public void deleteFriend(int idx) {
         try {
-            watchedProfiles.remove(friends.get(idx - 1));
             friends.remove(idx - 1);
         } catch (Exception e) {
             System.out.println("||| Exception in <profile.deleteFriend>:\n" + e);
@@ -184,9 +175,7 @@ public class Profile {
     }
 
     public String getStrNotLovedByDB() {
-        if (notLovedBy.isEmpty())
-            return "None";
-        return String.join(",", notLovedBy);
+        return "None";
     }
 
     public String getStrNotLovedDB() {
@@ -207,17 +196,12 @@ public class Profile {
         return StringFunctions.formatFriendsToProfile(notLoved, allUsers);
     }
 
-    public List<String> getNotLovedBy() {
-        return notLovedBy;
-    }
-
-    public void addNotLovedBy(String anothersUserChatId) {
-        notLovedBy.add(anothersUserChatId);
+    public List<String> getNotLoved() {
+        return notLoved;
     }
 
     public void deleteNotLoved(int idx) {
         try {
-            watchedProfiles.remove(notLoved.get(idx - 1));
             notLoved.remove(idx - 1);
         } catch (Exception e) {
             System.out.println("||| Exception in <profile.deleteNotLovedBy>:\n" + e);
@@ -311,17 +295,6 @@ public class Profile {
 
     public void setUserState(State userState) {
         this.userState = userState;
-    }
-
-    public Set<String> getWatchedProfiles() {
-        if (watchedProfiles == null) {
-            watchedProfiles = new HashSet<>();
-        }
-        return watchedProfiles;
-    }
-
-    public void addWatchedProfile(String anothersUserChatId) {
-        watchedProfiles.add(anothersUserChatId);
     }
 
     public String getLastViewedProfile() {
