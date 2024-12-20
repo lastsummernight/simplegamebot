@@ -22,7 +22,7 @@ import java.util.List;
  * hobbies - user hobbies
  * not_loved - people disliked by user, equal to <notLoved>
  * tagged - people which recive user request, equal to <taggedUsers>
-*/
+ */
 
 public class DatabaseManager {
     private static final String URL = "jdbc:sqlite:datingbotdb.db";

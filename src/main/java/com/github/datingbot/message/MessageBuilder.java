@@ -24,7 +24,7 @@ public class MessageBuilder {
         }
     }
 
-    public static boolean hasPhoto(String chatId) throws MyException{
+    public static boolean hasPhoto(String chatId) throws MyException {
         Message temp = mapOfMessages.get(chatId);
         if (temp == null) throw new InvalidMapKeyException();
         return temp.hasPhoto();
@@ -61,7 +61,7 @@ public class MessageBuilder {
         mapOfMessages.get(chatId).setKeyboard(keyboard);
     }
 
-    private static void usualMessage(String chatId, String text, Keyboard keyboard, String photoUrl) {
+    public static void usualMessage(String chatId, String text, Keyboard keyboard, String photoUrl) {
         usualMessage(chatId, text);
         mapOfMessages.get(chatId).setKeyboard(keyboard);
         mapOfMessages.get(chatId).setPhotoUrl(photoUrl);

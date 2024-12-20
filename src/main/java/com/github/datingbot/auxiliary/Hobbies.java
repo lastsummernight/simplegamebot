@@ -4,7 +4,7 @@ import java.util.List;
 
 public enum Hobbies {
 
-    LITERATURE_HOBBY(0,"Литература"),
+    LITERATURE_HOBBY(0, "Литература"),
     DANCE_HOBBY(1, "Танцы"),
     VIDEOGAMES_HOBBY(2, "Видеоигры"),
     SCIENCE_HOBBY(3, "Наука"),
@@ -33,8 +33,7 @@ public enum Hobbies {
     public static Hobbies getHobbyBySpecificValue(String key) {
         try {
             return List.of(Hobbies.values()).get(StringFunctions.isNum(key));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

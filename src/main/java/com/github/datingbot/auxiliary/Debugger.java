@@ -13,8 +13,7 @@ public class Debugger {
     public static void setUp() {
         try {
             printStream = new PrintStream(System.out, true, "utf-8");
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }

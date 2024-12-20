@@ -3,6 +3,7 @@ package com.github.datingbot.profile;
 import com.github.datingbot.auxiliary.Hobbies;
 import com.github.datingbot.auxiliary.State;
 import com.github.datingbot.auxiliary.StringFunctions;
+import com.github.datingbot.auxiliary.env;
 
 import java.util.*;
 
@@ -66,14 +67,12 @@ public class Profile {
 
         if (!t.get(6).equals("None")) {
             friends = new ArrayList<>(Arrays.asList(t.get(6).split(",")));
-        }
-        else
+        } else
             friends = new ArrayList<>();
 
         if (!t.get(7).equals("None")) {
             notLovedBy = new ArrayList<>(Arrays.asList(t.get(7).split(",")));
-        }
-        else
+        } else
             notLovedBy = new ArrayList<>();
 
         if (!t.get(8).equals("None")) {
@@ -82,20 +81,17 @@ public class Profile {
             for (String value : hobbyValues) {
                 userHobbies.add(Hobbies.getHobbyBySpecificValue(value));
             }
-        }
-        else
+        } else
             userHobbies = new ArrayList<>();
 
         if (!t.get(9).equals("None")) {
             notLoved = new ArrayList<>(Arrays.asList(t.get(9).split(",")));
-        }
-        else
+        } else
             notLoved = new ArrayList<>();
 
         if (!t.get(10).equals("None")) {
             taggedUsers = new ArrayList<>(Arrays.asList(t.get(10).split(",")));
-        }
-        else
+        } else
             taggedUsers = new ArrayList<>();
     }
 
@@ -115,7 +111,7 @@ public class Profile {
         }
         String result = "";
         for (Hobbies temp : userHobbies) {
-            result += temp.getSpecificValue()+",";
+            result += temp.getSpecificValue() + ",";
         }
         return result;
     }
@@ -150,13 +146,6 @@ public class Profile {
         }
     }
 
-    // А нахуй оно нужно
-    public void deleteTaggedUsers(String anothersUserChatId) {
-        if (taggedUsers.contains(anothersUserChatId)) {
-            taggedUsers.remove(anothersUserChatId);
-        }
-    }
-
     public String getStrFriendsDB() {
         if (friends.isEmpty())
             return "None";
@@ -185,19 +174,11 @@ public class Profile {
         }
     }
 
-    // А нахуй оно нужно
-    public void deleteFriend(String anothersUserChatId) {
-        if (friends.contains(anothersUserChatId)) {
-            friends.remove(anothersUserChatId);
-        }
-    }
-
     public void deleteFriend(int idx) {
         try {
             watchedProfiles.remove(friends.get(idx - 1));
             friends.remove(idx - 1);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("||| Exception in <profile.deleteFriend>:\n" + e);
         }
     }
@@ -234,30 +215,13 @@ public class Profile {
         notLovedBy.add(anothersUserChatId);
     }
 
-    // А нахуй оно нужно
-    public void deleteNotLovedBy(String chatId) {
-        if (notLovedBy.contains(chatId))
-            notLovedBy.remove(chatId);
-    }
-
     public void deleteNotLoved(int idx) {
         try {
             watchedProfiles.remove(notLoved.get(idx - 1));
             notLoved.remove(idx - 1);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("||| Exception in <profile.deleteNotLovedBy>:\n" + e);
         }
-    }
-
-    // А нахуй оно нужно
-    public void deleteAllNotLovedBy() {
-        notLovedBy.clear();
-    }
-
-    // А нахуй оно нужно
-    public List<String> getNotLoved() {
-        return notLoved;
     }
 
     public void addNotLoved(String anothersUserChatId) {
@@ -291,6 +255,10 @@ public class Profile {
     public String getStr() {
         return username + ' ' + StringFunctions.yearsOld(age) + " (" + gender + ")\n\nГород: " + city + "\n\nО себе:\n" +
                 info + "\n\n" + getStrHobbies();
+    }
+
+    public String getPhotoUrl() {
+        return env.photoPath + chatId + ".png";
     }
 
     public String getChatId() {
@@ -362,10 +330,5 @@ public class Profile {
 
     public void setLastViewedProfile(String lastViewedProfile) {
         this.lastViewedProfile = lastViewedProfile;
-    }
-
-    // А нахуй оно нужно
-    public void deleteWatchedProfiles() {
-        watchedProfiles.clear();
     }
 }

@@ -18,11 +18,6 @@ public class Message {
     private String chatId;
     private String photoUrl;
 
-    public Message(String chatId) {
-        this.chatId = chatId;
-        keyboard = EMPTY_KEYBOARD;
-    }
-
     public Message(String chatId, String text) {
         this.chatId = chatId;
         message = text;
@@ -33,21 +28,10 @@ public class Message {
         return message != null;
     }
 
-    public void reset() {
-        message = null;
-        keyboard = EMPTY_KEYBOARD;
-        photoUrl = null;
-    }
-
     public void reset(String message) {
         this.message = message;
         keyboard = EMPTY_KEYBOARD;
         photoUrl = null;
-    }
-
-    public void reset(String message, Keyboard keyboard) {
-        this.message = message;
-        this.keyboard = keyboard;
     }
 
     public SendMessage execute(String chatId) {
@@ -64,34 +48,17 @@ public class Message {
             returned.setCaption(message);
             returned.setReplyMarkup(keyboard.getKeyboardMarkup());
             return returned;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new PhotoMissingException();
         }
-    }
-
-    public ReplyKeyboardMarkup getKeyboard() {
-        return keyboard.getKeyboardMarkup();
     }
 
     public void setKeyboard(Keyboard keyboard) {
         this.keyboard = keyboard;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
     }
 
     public boolean hasPhoto() {

@@ -60,6 +60,11 @@ public class KeyboardBuilder {
 
                 keyboardRow.add("Пол");
                 keyboardRow.add("О себе");
+                keyboardRow.add("Фото");
+
+                keyboard.add(keyboardRow);
+                keyboardRow = new KeyboardRow();
+
                 keyboardRow.add("Назад");
                 keyboard.add(keyboardRow);
                 break;

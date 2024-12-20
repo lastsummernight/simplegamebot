@@ -5,8 +5,7 @@ import com.github.datingbot.profile.Profile;
 import java.util.HashMap;
 import java.util.List;
 
-public class StringFunctions
-{
+public class StringFunctions {
     public static int isNum(String someLine) {
         try {
             return Integer.parseInt(someLine);

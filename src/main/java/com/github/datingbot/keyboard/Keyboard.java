@@ -19,8 +19,6 @@ public enum Keyboard {
 
     private ReplyKeyboardMarkup keyboardMarkup;
 
-    Keyboard() {}
-
     Keyboard(ReplyKeyboardMarkup keyboardMarkup) {
         this.keyboardMarkup = keyboardMarkup;
     }

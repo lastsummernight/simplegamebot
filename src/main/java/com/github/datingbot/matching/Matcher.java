@@ -35,8 +35,7 @@ public class Matcher {
                     resultProfile = tempProfile;
                     maxValue = valFunc;
                 }
-            }
-            else
+            } else
                 profile.addWatchedProfile(tempProfile.getChatId());
         }
 
@@ -46,7 +45,7 @@ public class Matcher {
         return resultProfile;
     }
 
-    public static int ValueFunction(Profile seeker, Profile target){
+    public static int ValueFunction(Profile seeker, Profile target) {
         if (seeker.getGender().equals(target.getGender()))
             return 0;
 
