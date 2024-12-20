@@ -19,7 +19,6 @@ public class Profile {
 
     private List<Hobbies> userHobbies;
     private List<String> friends;
-    private List<String> notLovedBy; // Пользователи которые отвергли этот профиль
     private List<String> notLoved;
     private List<String> taggedUsers;
 
