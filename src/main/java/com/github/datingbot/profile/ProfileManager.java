@@ -19,11 +19,11 @@ import static com.github.datingbot.auxiliary.State.*;
 
 public class ProfileManager {
 
-    private static void supportName(Message message, Profile profile, boolean flag) {
+    private static void supportName(Message message, Profile profile, boolean isIsolated) {
         String messageText = "";
         if (message.hasText()) messageText = message.getText();
         profile.setUsername(messageText);
-        if (!flag) {
+        if (!isIsolated) {
             profile.setUserState(USER_AGE);
             MessageBuilder.usualMessage(profile.getChatId(), "Введи возраст (число):");
         } else {
@@ -32,14 +32,14 @@ public class ProfileManager {
         }
     }
 
-    private static void supportAge(Message message, Profile profile, boolean flag) {
+    private static void supportAge(Message message, Profile profile, boolean isIsolated) {
         String messageText = "";
         if (message.hasText()) messageText = message.getText();
         int age = StringFunctions.isNum(messageText);
         if (age != -1) {
             if ((age >= 18) && (age <= 100)) {
                 profile.setAge(age);
-                if (!flag) {
+                if (!isIsolated) {
                     profile.setUserState(USER_CITY);
                     MessageBuilder.usualMessage(profile.getChatId(), "Введи свой город:");
                 } else {
@@ -52,11 +52,11 @@ public class ProfileManager {
         MessageBuilder.usualMessage(profile.getChatId(), "Твой возраст должен быть числом от 18 лет ");
     }
 
-    private static void supportCity(Message message, Profile profile, boolean flag) {
+    private static void supportCity(Message message, Profile profile, boolean isIsolated) {
         String messageText = "";
         if (message.hasText()) messageText = message.getText();
         profile.setCity(messageText);
-        if (!flag) {
+        if (!isIsolated) {
             profile.setUserState(USER_GENDER);
             MessageBuilder.usualMessage(profile.getChatId(), "Введи пол:", GENDER_KEYBOARD);
         } else {
@@ -65,12 +65,12 @@ public class ProfileManager {
         }
     }
 
-    private static void supportGender(Message message, Profile profile, boolean flag) {
+    private static void supportGender(Message message, Profile profile, boolean isIsolated) {
         String messageText = "";
         if (message.hasText()) messageText = message.getText();
         if ((messageText.equals("Парень")) || (messageText.equals("Девушка"))) {
             profile.setGender(message.getText());
-            if (!flag) {
+            if (!isIsolated) {
                 profile.setUserState(USER_INFO);
                 MessageBuilder.usualMessage(profile.getChatId(), "Введи о себе:");
             } else {
@@ -82,11 +82,11 @@ public class ProfileManager {
         MessageBuilder.usualMessage(profile.getChatId(), "Неправильный ввод", GENDER_KEYBOARD);
     }
 
-    private static void supportInfo(Message message, Profile profile, boolean flag) {
+    private static void supportInfo(Message message, Profile profile, boolean isIsolated) {
         String messageText = "";
         if (message.hasText()) messageText = message.getText();
         profile.setInfo(messageText);
-        if (!flag) {
+        if (!isIsolated) {
             profile.setUserState(USER_PHOTO);
             MessageBuilder.usualMessage(profile.getChatId(), "Отправь свою самую лучшую фотку");
         } else {
@@ -119,7 +119,7 @@ public class ProfileManager {
         }
     }
 
-    private static void supportPhoto(Message message, Profile profile, TelegramClient telegramClient, boolean flag) {
+    private static void supportPhoto(Message message, Profile profile, TelegramClient telegramClient, boolean isIsolated) {
         var photos = message.getPhoto();
         System.out.println(photos);
         if (photos != null) {
@@ -127,14 +127,13 @@ public class ProfileManager {
                 GetFile getFile = new GetFile(photo.getFileId());
                 try {
                     File photoFile = telegramClient.downloadFile(telegramClient.execute(getFile));
-                    File temp = new File(env.photoPath +
-                            profile.getChatId() + ".png");
+                    File temp = new File(env.photoPath + profile.getChatId() + ".png");
                     if (temp.exists()) {
                         temp.delete();
                     }
                     photoFile.renameTo(temp);
 
-                    if (!flag) {
+                    if (!isIsolated) {
                         profile.setUserState(USER_HOBBIES);
                         MessageBuilder.usualMessage(profile.getChatId(), "Выбери интересы", HOBBY_KEYBOARD);
                     } else {

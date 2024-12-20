@@ -28,7 +28,7 @@ public class Matcher {
         for (String chatId : allChatIds) {
             Profile tempProfile = allUsers.get(chatId);
 
-            int valFunc = ValueFunction(profile, tempProfile);
+            int valFunc = valueFunction(profile, tempProfile);
             if (valFunc > 0) {
                 if (valFunc > maxValue) {
                     resultProfile = tempProfile;
@@ -43,7 +43,7 @@ public class Matcher {
         return resultProfile;
     }
 
-    public static int ValueFunction(Profile seeker, Profile target) {
+    public static int valueFunction(Profile seeker, Profile target) {
         if (seeker.getGender().equals(target.getGender()))
             return 0;
 
