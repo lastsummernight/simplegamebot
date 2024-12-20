@@ -13,9 +13,8 @@ public class Matcher {
         Set<String> allChatIds = allUsers.keySet().stream().collect(Collectors.toSet());
 
         Set<String> notRecomendedMatches = new HashSet<>();
-        notRecomendedMatches.addAll(profile.getWatchedProfiles());
         notRecomendedMatches.addAll(profile.getFriends());
-        notRecomendedMatches.addAll(profile.getNotLovedBy());
+        notRecomendedMatches.addAll(profile.getNotLoved());
 
         allChatIds.removeAll(notRecomendedMatches);
 
@@ -35,8 +34,7 @@ public class Matcher {
                     resultProfile = tempProfile;
                     maxValue = valFunc;
                 }
-            } else
-                profile.addWatchedProfile(tempProfile.getChatId());
+            }
         }
 
         if (maxValue == 0)
