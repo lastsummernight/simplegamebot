@@ -188,7 +188,7 @@ public class MyAmazingBot implements LongPollingSingleThreadUpdateConsumer {
                 DatabaseManager.changeUser(currentUser);
                 MessageBuilder.usualMessage(chatId, "Простите в данный момент подходящих профилей нет :(", MAIN_MENU_KEYBOARD);
             }
-        } else MessageBuilder.usualMessage(chatId, "something wrong", MAIN_MENU_KEYBOARD);
+        } else MessageBuilder.usualMessage(chatId, "Некорректный ввод", FINDING_KEYBOARD);
     }
 
     private void connectionMenuFunction(String chatId, String messageText) {
