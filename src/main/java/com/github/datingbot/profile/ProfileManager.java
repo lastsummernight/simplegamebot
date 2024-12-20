@@ -37,7 +37,7 @@ public class ProfileManager {
         if (message.hasText()) messageText = message.getText();
         int age = StringFunctions.isNum(messageText);
         if (age != -1) {
-            if ((age >= 18) && (age <= 50)) {
+            if ((age >= 18) && (age <= 100)) {
                 profile.setAge(age);
                 if (!flag) {
                     profile.setUserState(USER_CITY);
